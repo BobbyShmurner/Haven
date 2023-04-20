@@ -1,6 +1,13 @@
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-Future<Position> getLocation() async {
+extension PositionExtensions on Position {
+  LatLng toLatLng() {
+    return LatLng(latitude, longitude);
+  }
+}
+
+Future<LatLng> getDeviceLocation() async {
   bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
   if (!serviceEnabled) {
     return Future.error('Location services are disabled.');
@@ -19,5 +26,5 @@ Future<Position> getLocation() async {
         'Location permissions are permanently denied, we cannot request permissions.');
   }
 
-  return await Geolocator.getCurrentPosition();
+  return (await Geolocator.getCurrentPosition()).toLatLng();
 }

@@ -1,10 +1,8 @@
-import 'dart:async';
-
 import 'location.dart';
+import 'marker.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:geolocator/geolocator.dart';
 
 const String mapStyle = """[
   {
@@ -64,7 +62,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Kainos Map',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -94,18 +92,42 @@ class MapPage extends StatefulWidget {
 class _MapPageState extends State<MapPage> {
   late GoogleMapController _controller;
 
-  GoogleMap _createMainMap(LatLng initalPosition) {
+  CameraPosition? _cameraPos;
+  final List<Marker> _markers = <Marker>[];
+
+  @override
+  void initState() {
+    super.initState();
+    MarkersExtension.init();
+  }
+
+  GoogleMap _createMainMap() {
     return GoogleMap(
       mapType: MapType.normal,
       myLocationEnabled: true,
       zoomControlsEnabled: false,
       tiltGesturesEnabled: false,
-      initialCameraPosition: CameraPosition(target: initalPosition, zoom: 18.0),
+      initialCameraPosition: _cameraPos!,
       onMapCreated: (GoogleMapController controller) {
         _controller = controller;
         _controller.setMapStyle(mapStyle);
       },
+      markers: _markers.toSet(),
+      onCameraMove: (pos) {
+        _cameraPos = pos;
+      },
     );
+  }
+
+  void addMarker(String id, LatLng position, {MarkerIcons? icon}) {
+    setState(() {
+      _markers.add(Marker(
+          markerId: MarkerId(id),
+          position: position,
+          icon: icon != null ? icon.icon : BitmapDescriptor.defaultMarker));
+
+      _createMainMap();
+    });
   }
 
   @override
@@ -115,9 +137,14 @@ class _MapPageState extends State<MapPage> {
         title: Text(widget.title),
         leading: const Icon(Icons.location_on),
       ),
-      body: FutureBuilder<Position>(
-        future: getLocation(),
-        builder: (BuildContext context, AsyncSnapshot<Position> location) {
+      body: FutureBuilder<LatLng?>(
+        // We only want to get the location for the inital creation of the map
+        // Every rebuild after the first should just use the current camera location,
+        // So there's no need to get users location again
+        future: _cameraPos == null
+            ? getDeviceLocation()
+            : Future.delayed(Duration.zero),
+        builder: (BuildContext context, AsyncSnapshot<LatLng?> location) {
           if (location.connectionState != ConnectionState.done) {
             return Center(
               child: Column(
@@ -150,10 +177,20 @@ class _MapPageState extends State<MapPage> {
               );
             }
 
-            return _createMainMap(
-                LatLng(location.data!.latitude, location.data!.longitude));
+            _cameraPos ??= CameraPosition(target: location.data!, zoom: 15.0);
+            return _createMainMap();
           }
         },
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          addMarker(DateTime.now().millisecondsSinceEpoch.toString(),
+              _cameraPos!.target,
+              icon: MarkerIcons.testMarker);
+        },
+        backgroundColor: Colors.pink,
+        icon: const Icon(Icons.location_on_outlined),
+        label: const Text("Add Marker"),
       ),
     );
   }
