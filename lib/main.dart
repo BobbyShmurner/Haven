@@ -152,7 +152,8 @@ class _MapPageState extends State<MapPage> {
 
           _cameraPos ??= location.hasError
               ? const CameraPosition(
-                  target: LatLng(0.0, 0.0),
+                  target: LatLng(54.330483122642576, -4.557963944971561),
+                  zoom: 5.45,
                 )
               : CameraPosition(
                   target: location.data!,
