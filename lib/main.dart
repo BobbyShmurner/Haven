@@ -160,26 +160,17 @@ class _MapPageState extends State<MapPage> {
                 ],
               ),
             );
-          } else {
-            if (location.hasError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text(
-                      "TODO: Put a serach bar so people can choose their location",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 30),
-                      softWrap: true,
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            _cameraPos ??= CameraPosition(target: location.data!, zoom: 15.0);
-            return _createMainMap();
           }
+
+          _cameraPos ??= location.hasError
+              ? const CameraPosition(
+                  target: LatLng(0.0, 0.0),
+                )
+              : CameraPosition(
+                  target: location.data!,
+                  zoom: 15.0,
+                );
+          return _createMainMap();
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
