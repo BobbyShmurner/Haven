@@ -119,14 +119,9 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  void addMarker(String id, LatLng position, {MarkerIcons? icon}) {
+  void addMarker(Marker marker) {
     setState(() {
-      _markers.add(Marker(
-          markerId: MarkerId(id),
-          position: position,
-          icon: icon != null ? icon.icon : BitmapDescriptor.defaultMarker));
-
-      _createMainMap();
+      _markers.add(marker);
     });
   }
 
@@ -170,14 +165,19 @@ class _MapPageState extends State<MapPage> {
                   target: location.data!,
                   zoom: 15.0,
                 );
+
           return _createMainMap();
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          addMarker(DateTime.now().millisecondsSinceEpoch.toString(),
+          addMarker(
+            createMarker(
+              DateTime.now().millisecondsSinceEpoch.toString(),
               _cameraPos!.target,
-              icon: MarkerIcons.testMarker);
+              icon: MarkerIcons.testMarker,
+            ),
+          );
         },
         backgroundColor: Colors.pink,
         icon: const Icon(Icons.location_on_outlined),

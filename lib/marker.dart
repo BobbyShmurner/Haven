@@ -6,6 +6,14 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 enum MarkerIcons { testMarker }
 
+Marker createMarker(String id, LatLng position, {MarkerIcons? icon}) {
+  return Marker(
+    markerId: MarkerId(id),
+    position: position,
+    icon: icon != null ? icon.icon : BitmapDescriptor.defaultMarker,
+  );
+}
+
 extension MarkersExtension on MarkerIcons {
   static final Map<MarkerIcons, BitmapDescriptor> _bitmaps =
       <MarkerIcons, BitmapDescriptor>{};
