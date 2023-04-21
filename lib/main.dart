@@ -64,15 +64,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Kainos Map',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke+
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.blue,
       ),
       home: const MapPage(title: 'Kainos Map'),
@@ -140,7 +131,9 @@ class _MapPageState extends State<MapPage> {
             ? getDeviceLocation()
             : Future.delayed(Duration.zero),
         builder: (BuildContext context, AsyncSnapshot<LatLng?> location) {
-          if (location.connectionState != ConnectionState.done) {
+          // We only want to show the loading screen if we don't know the camera's position
+          if (_cameraPos == null &&
+              location.connectionState != ConnectionState.done) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
