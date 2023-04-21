@@ -1,5 +1,10 @@
+import 'marker.dart';
+import 'dart:convert';
+import 'env/env.dart';
+
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 
 extension PositionExtensions on Position {
   LatLng toLatLng() {
@@ -27,4 +32,39 @@ Future<LatLng> getDeviceLocation() async {
   }
 
   return (await Geolocator.getCurrentPosition()).toLatLng();
+}
+
+Future<Map<String, dynamic>> searchForLocations(LatLng location, int radius,
+    {String? keyword}) async {
+  String url =
+      "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location.latitude},${location.longitude}&radius=$radius&key=${Env.mapsApiKey}";
+  if (keyword != null) url += "&keyword=$keyword";
+
+  var response = await http.get(Uri.parse(url));
+  if (response.statusCode != 200) throw response.statusCode;
+
+  return jsonDecode(response.body);
+}
+
+Future<List<Marker>> createMarkersInRadius(LatLng location, int radius,
+    {String? keyword}) async {
+  var response = await searchForLocations(location, radius, keyword: keyword);
+  List<Marker> markers = <Marker>[];
+
+  for (Map<String, dynamic> place in response['results']) {
+    if (!place.containsKey("geometry") || !place.containsKey("place_id")) {
+      continue;
+    }
+
+    String place_id = place['place_id'];
+
+    LatLng position = LatLng(
+      place['geometry']['location']['lat'],
+      place['geometry']['location']['lng'],
+    );
+
+    markers.add(createMarker(place_id, position));
+  }
+
+  return markers;
 }

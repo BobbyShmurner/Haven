@@ -2,6 +2,7 @@ import 'location.dart';
 import 'marker.dart';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 const String mapStyle = """[
@@ -84,6 +85,7 @@ class _MapPageState extends State<MapPage> {
   late GoogleMapController _controller;
 
   CameraPosition? _cameraPos;
+  bool _isSearching = false;
   final List<Marker> _markers = <Marker>[];
 
   @override
@@ -114,6 +116,27 @@ class _MapPageState extends State<MapPage> {
     setState(() {
       _markers.add(marker);
     });
+  }
+
+  void addMarkers(Iterable<Marker> markers) {
+    setState(() {
+      _markers.addAll(markers);
+    });
+  }
+
+  Future<void> searchForMarkers() async {
+    setState(() {
+      _isSearching = true;
+    });
+
+    var markers = await createMarkersInRadius(_cameraPos!.target, 50000,
+        keyword: "Food Bank");
+
+    setState(() {
+      _isSearching = false;
+    });
+
+    addMarkers(markers);
   }
 
   @override
@@ -164,18 +187,21 @@ class _MapPageState extends State<MapPage> {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          addMarker(
-            createMarker(
-              DateTime.now().millisecondsSinceEpoch.toString(),
-              _cameraPos!.target,
-              icon: MarkerIcons.testMarker,
-            ),
-          );
-        },
+        onPressed: _isSearching ? null : searchForMarkers,
         backgroundColor: Colors.pink,
-        icon: const Icon(Icons.location_on_outlined),
-        label: const Text("Add Marker"),
+        icon: _isSearching
+            ? const SizedBox(
+                width: 25,
+                height: 25,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                ),
+              )
+            : const Icon(
+                Icons.location_on_outlined,
+                size: 25.0,
+              ),
+        label: const Text("Search For Food Banks"),
       ),
     );
   }

@@ -2,6 +2,7 @@
     package="com.example.kainos_map">
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
    <application
         android:label="kainos_map"
         android:name="${applicationName}"
@@ -33,6 +34,6 @@
             android:name="flutterEmbedding"
             android:value="2" />
         <meta-data android:name="com.google.android.geo.API_KEY"
-               android:value="MAPS_API_KEY" />
+               android:value="${mapsApiKey}" />
     </application>
 </manifest>
