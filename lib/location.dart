@@ -46,8 +46,8 @@ Future<Map<String, dynamic>> searchForLocations(LatLng location, int radius,
   return jsonDecode(response.body);
 }
 
-Future<List<Marker>> createMarkersInRadius(LatLng location, int radius,
-    {String? keyword}) async {
+Future<List<Marker>> createMarkersFromSearch(LatLng location,
+    {String? keyword, MarkerIcons? icon, int radius = 50000}) async {
   var response = await searchForLocations(location, radius, keyword: keyword);
   List<Marker> markers = <Marker>[];
 
@@ -56,14 +56,23 @@ Future<List<Marker>> createMarkersInRadius(LatLng location, int radius,
       continue;
     }
 
-    String place_id = place['place_id'];
+    String placeId = place['place_id'];
 
     LatLng position = LatLng(
       place['geometry']['location']['lat'],
       place['geometry']['location']['lng'],
     );
 
-    markers.add(createMarker(place_id, position));
+    markers.add(
+      createMarker(
+        placeId,
+        position,
+        icon: icon,
+        info: InfoWindow(
+            title: place.containsKey('name') ? place['name'] : null,
+            snippet: keyword),
+      ),
+    );
   }
 
   return markers;

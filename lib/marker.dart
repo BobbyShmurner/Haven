@@ -4,13 +4,15 @@ import 'package:flutter/services.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-enum MarkerIcons { testMarker }
+enum MarkerIcons { foodBank, homelessShelter }
 
-Marker createMarker(String id, LatLng position, {MarkerIcons? icon}) {
+Marker createMarker(String id, LatLng position,
+    {MarkerIcons? icon, InfoWindow? info}) {
   return Marker(
     markerId: MarkerId(id),
     position: position,
     icon: icon != null ? icon.icon : BitmapDescriptor.defaultMarker,
+    infoWindow: info ?? InfoWindow.noText,
   );
 }
 
@@ -19,7 +21,9 @@ extension MarkersExtension on MarkerIcons {
       <MarkerIcons, BitmapDescriptor>{};
 
   static Future<void> init() async {
-    await _createBitmap(MarkerIcons.testMarker, "images/test_marker.png");
+    _createBitmapFromDefault(MarkerIcons.foodBank, BitmapDescriptor.hueOrange);
+    _createBitmapFromDefault(
+        MarkerIcons.homelessShelter, BitmapDescriptor.hueBlue);
   }
 
   static Future<void> _createBitmap(
@@ -29,6 +33,10 @@ extension MarkersExtension on MarkerIcons {
         const ImageConfiguration(size: Size(0.1, 0.1), devicePixelRatio: 0.1),
         assetName,
         bundle: rootBundle);
+  }
+
+  static void _createBitmapFromDefault(MarkerIcons marker, double hue) {
+    _bitmaps[marker] = BitmapDescriptor.defaultMarkerWithHue(hue);
   }
 
   BitmapDescriptor get icon {

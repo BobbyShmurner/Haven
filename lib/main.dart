@@ -2,7 +2,6 @@ import 'location.dart';
 import 'marker.dart';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 const String mapStyle = """[
@@ -129,8 +128,12 @@ class _MapPageState extends State<MapPage> {
       _isSearching = true;
     });
 
-    var markers = await createMarkersInRadius(_cameraPos!.target, 50000,
-        keyword: "Food Bank");
+    List<Marker> markers = <Marker>[];
+
+    markers.addAll(await createMarkersFromSearch(_cameraPos!.target,
+        keyword: "Food Bank", icon: MarkerIcons.foodBank));
+    markers.addAll(await createMarkersFromSearch(_cameraPos!.target,
+        keyword: "Homeless Shelter", icon: MarkerIcons.homelessShelter));
 
     setState(() {
       _isSearching = false;
@@ -180,7 +183,7 @@ class _MapPageState extends State<MapPage> {
                 )
               : CameraPosition(
                   target: location.data!,
-                  zoom: 15.0,
+                  zoom: 12.0,
                 );
 
           return _createMainMap();
@@ -201,7 +204,7 @@ class _MapPageState extends State<MapPage> {
                 Icons.location_on_outlined,
                 size: 25.0,
               ),
-        label: const Text("Search For Food Banks"),
+        label: const Text("Search For Markers"),
       ),
     );
   }
