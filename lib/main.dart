@@ -1,5 +1,5 @@
 import 'location.dart';
-import 'marker.dart';
+import 'place.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -85,12 +85,12 @@ class _MapPageState extends State<MapPage> {
 
   CameraPosition? _cameraPos;
   bool _isSearching = false;
-  final List<Marker> _markers = <Marker>[];
+  Set<Marker> _markers = <Marker>{};
 
   @override
   void initState() {
     super.initState();
-    MarkersExtension.init();
+    PlaceTypeExtensions.init();
   }
 
   GoogleMap _createMainMap() {
@@ -104,93 +104,80 @@ class _MapPageState extends State<MapPage> {
         _controller = controller;
         _controller.setMapStyle(mapStyle);
       },
-      markers: _markers.toSet(),
+      markers: _markers,
       onCameraMove: (pos) {
         _cameraPos = pos;
       },
     );
   }
 
-  void addMarker(Marker marker) {
-    setState(() {
-      _markers.add(marker);
-    });
-  }
-
-  void addMarkers(Iterable<Marker> markers) {
-    setState(() {
-      _markers.addAll(markers);
-    });
-  }
-
   Future<void> searchForMarkers() async {
-    setState(() {
-      _isSearching = true;
-    });
+    setState(() => _isSearching = true);
 
-    List<Marker> markers = <Marker>[];
-
-    markers.addAll(await createMarkersFromSearch(_cameraPos!.target,
-        keyword: "Food Bank", icon: MarkerIcons.foodBank));
-    markers.addAll(await createMarkersFromSearch(_cameraPos!.target,
-        keyword: "Homeless Shelter", icon: MarkerIcons.homelessShelter));
+    await Place.searchForPlaces(_cameraPos!.target);
+    Set<Marker> markers = Place.getPlaceMarkers().toSet();
 
     setState(() {
+      _markers = markers;
       _isSearching = false;
     });
-
-    addMarkers(markers);
   }
 
   @override
   Widget build(BuildContext context) {
+    bool firstLoad = _cameraPos == null;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
         leading: const Icon(Icons.location_on),
       ),
       body: FutureBuilder<LatLng?>(
-        // We only want to get the location for the inital creation of the map
+        // We only want to get the location on the first load.
         // Every rebuild after the first should just use the current camera location,
         // So there's no need to get users location again
-        future: _cameraPos == null
-            ? getDeviceLocation()
-            : Future.delayed(Duration.zero),
+        future: firstLoad ? getDeviceLocation() : Future.delayed(Duration.zero),
         builder: (BuildContext context, AsyncSnapshot<LatLng?> location) {
-          // We only want to show the loading screen if we don't know the camera's position
-          if (_cameraPos == null &&
-              location.connectionState != ConnectionState.done) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Text(
-                    "Loading...",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 30),
-                  ),
-                  Padding(padding: EdgeInsets.all(10.0)),
-                  CircularProgressIndicator()
-                ],
-              ),
-            );
-          }
+          // We only want to show the loading screen while waiting for the location
+          if (firstLoad) {
+            if (location.connectionState != ConnectionState.done) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Text(
+                      "Loading...",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 30),
+                    ),
+                    Padding(padding: EdgeInsets.all(10.0)),
+                    CircularProgressIndicator()
+                  ],
+                ),
+              );
+            }
 
-          _cameraPos ??= location.hasError
-              ? const CameraPosition(
-                  target: LatLng(54.330483122642576, -4.557963944971561),
-                  zoom: 5.45,
-                )
-              : CameraPosition(
-                  target: location.data!,
-                  zoom: 12.0,
-                );
+            // If we don't return, loading is finished and we have our location
+
+            _cameraPos = location.hasError
+                ? const CameraPosition(
+                    target: LatLng(54.330483122642576, -4.557963944971561),
+                    zoom: 5.45,
+                  )
+                : CameraPosition(
+                    target: location.data!,
+                    zoom: 12.0,
+                  );
+
+            WidgetsBinding.instance
+                .addPostFrameCallback((_) => searchForMarkers());
+          }
 
           return _createMainMap();
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _isSearching ? null : searchForMarkers,
+        onPressed: _isSearching ? null : () => searchForMarkers(),
         backgroundColor: Colors.pink,
         icon: _isSearching
             ? const SizedBox(
