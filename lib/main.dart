@@ -89,8 +89,18 @@ class LoadingPage extends StatelessWidget {
       child: Scaffold(
         appBar: appBar ??
             AppBar(
-              // TODO: Fix progress indicator not showing
-              leading: const CircularProgressIndicator(),
+              leading: Row(
+                children: const [
+                  Padding(
+                    padding: EdgeInsets.only(left: 17.5),
+                    child: SizedBox(
+                      width: 25,
+                      height: 25,
+                      child: CircularProgressIndicator(color: Colors.white),
+                    ),
+                  ),
+                ],
+              ),
               title: const Text("Loading"),
             ),
         body: Center(
