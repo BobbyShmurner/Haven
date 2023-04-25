@@ -7,33 +7,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
-enum PlaceType with EnumFlag { foodBank, homelessShelter }
+enum PlaceType with EnumFlag {
+  foodBank,
+  homelessShelter,
+  abuse,
+  police,
+  therapy,
+}
 
 extension PlaceTypeExtensions on PlaceType {
   static final Map<PlaceType, BitmapDescriptor> _bitmaps =
       <PlaceType, BitmapDescriptor>{};
-
-  static Future<void> init() async {
-    _createBitmapFromDefault(PlaceType.foodBank, BitmapDescriptor.hueOrange);
-    _createBitmapFromDefault(
-        PlaceType.homelessShelter, BitmapDescriptor.hueBlue);
-  }
-
-  static Future<void> _createBitmap(PlaceType type, String assetName) async {
-    // TODO: Figure out why the image isnt scaling
-    _bitmaps[type] = await BitmapDescriptor.fromAssetImage(
-        const ImageConfiguration(size: Size(0.1, 0.1), devicePixelRatio: 0.1),
-        assetName,
-        bundle: rootBundle);
-  }
-
-  static void _createBitmapFromDefault(PlaceType marker, double hue) {
-    _bitmaps[marker] = BitmapDescriptor.defaultMarkerWithHue(hue);
-  }
-
-  BitmapDescriptor get icon {
-    return _bitmaps[this]!;
-  }
 
   String get displayName {
     switch (this) {
@@ -41,13 +25,44 @@ extension PlaceTypeExtensions on PlaceType {
         return "Food Bank";
       case PlaceType.homelessShelter:
         return "Homeless Shelter";
+      case PlaceType.abuse:
+        return "Abuse Center";
+      case PlaceType.police:
+        return "Police Station";
+      case PlaceType.therapy:
+        return "Therapy Clinic";
     }
   }
 
   String get keyword {
-    // In the future, we may want to have more control over the keyword
-    // For now, we can just use the display name
-    return displayName;
+    switch (this) {
+      default:
+        return displayName;
+    }
+  }
+
+  BitmapDescriptor get icon {
+    return _bitmaps[this]!;
+  }
+
+  static Future<void> init() async {
+    _createBitmapFromDefault(PlaceType.foodBank, 60);
+    _createBitmapFromDefault(PlaceType.homelessShelter, 200);
+    _createBitmapFromDefault(PlaceType.abuse, 140);
+    _createBitmapFromDefault(PlaceType.police, 0);
+    _createBitmapFromDefault(PlaceType.therapy, 280);
+  }
+
+  static Future<void> _createBitmap(PlaceType type, String assetName) async {
+    _bitmaps[type] = await BitmapDescriptor.fromAssetImage(
+      ImageConfiguration.empty,
+      assetName,
+      bundle: rootBundle,
+    );
+  }
+
+  static void _createBitmapFromDefault(PlaceType marker, double hue) {
+    _bitmaps[marker] = BitmapDescriptor.defaultMarkerWithHue(hue);
   }
 }
 
