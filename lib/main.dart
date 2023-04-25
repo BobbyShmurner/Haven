@@ -66,14 +66,57 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MapPage(title: 'Kainos Map'),
+      home: const MapPage(title: "Kainos Map"),
+    );
+  }
+}
+
+class LoadingPage extends StatelessWidget {
+  LoadingPage(
+    Future<dynamic> Function() load, {
+    super.key,
+    void Function(dynamic)? onLoad,
+    this.appBar,
+  }) {
+    load().then((value) => onLoad != null ? onLoad(value) : null);
+  }
+
+  final AppBar? appBar;
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      child: Scaffold(
+        appBar: appBar ??
+            AppBar(
+              // TODO: Fix progress indicator not showing
+              leading: const CircularProgressIndicator(),
+              title: const Text("Loading"),
+            ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Text(
+                "Loading...",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 30),
+              ),
+              Padding(padding: EdgeInsets.all(10.0)),
+              CircularProgressIndicator()
+            ],
+          ),
+        ),
+      ),
+      onWillPop: () async {
+        return false;
+      },
     );
   }
 }
 
 class MapPage extends StatefulWidget {
   const MapPage({super.key, required this.title});
-
   final String title;
 
   @override
@@ -123,59 +166,49 @@ class _MapPageState extends State<MapPage> {
     });
   }
 
+  Future<void> _firstLoad() async {
+    try {
+      LatLng location = await getDeviceLocation();
+
+      _cameraPos = CameraPosition(
+        target: location,
+        zoom: 12.0,
+      );
+    } catch (_) {
+      _cameraPos = const CameraPosition(
+        target: LatLng(54.330483122642576, -4.557963944971561),
+        zoom: 5.45,
+      );
+    }
+
+    await searchForMarkers();
+  }
+
   @override
   Widget build(BuildContext context) {
-    bool firstLoad = _cameraPos == null;
+    if (_cameraPos == null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => LoadingPage(
+              _firstLoad,
+              onLoad: (_) {
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
+        ),
+      );
+
+      return const Scaffold();
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
         leading: const Icon(Icons.location_on),
       ),
-      body: FutureBuilder<LatLng?>(
-        // We only want to get the location on the first load.
-        // Every rebuild after the first should just use the current camera location,
-        // So there's no need to get users location again
-        future: firstLoad ? getDeviceLocation() : Future.delayed(Duration.zero),
-        builder: (BuildContext context, AsyncSnapshot<LatLng?> location) {
-          // We only want to show the loading screen while waiting for the location
-          if (firstLoad) {
-            if (location.connectionState != ConnectionState.done) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
-                    Text(
-                      "Loading...",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 30),
-                    ),
-                    Padding(padding: EdgeInsets.all(10.0)),
-                    CircularProgressIndicator()
-                  ],
-                ),
-              );
-            }
-
-            // If we don't return, loading is finished and we have our location
-
-            _cameraPos = location.hasError
-                ? const CameraPosition(
-                    target: LatLng(54.330483122642576, -4.557963944971561),
-                    zoom: 5.45,
-                  )
-                : CameraPosition(
-                    target: location.data!,
-                    zoom: 12.0,
-                  );
-
-            WidgetsBinding.instance
-                .addPostFrameCallback((_) => searchForMarkers());
-          }
-
-          return _createMainMap();
-        },
-      ),
+      body: _createMainMap(),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _isSearching ? null : () => searchForMarkers(),
         backgroundColor: Colors.pink,
