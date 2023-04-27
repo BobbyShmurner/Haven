@@ -34,6 +34,21 @@ extension PlaceTypeExtensions on PlaceType {
     }
   }
 
+  String get pluralName {
+    switch (this) {
+      case PlaceType.foodBank:
+        return "Food Banks";
+      case PlaceType.homelessShelter:
+        return "Homeless Shelters";
+      case PlaceType.abuse:
+        return "Abuse Centers";
+      case PlaceType.police:
+        return "Police Stations";
+      case PlaceType.suicide:
+        return "Sucide Prevention Centers";
+    }
+  }
+
   String get keyword {
     switch (this) {
       case PlaceType.suicide:

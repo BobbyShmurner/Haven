@@ -2,6 +2,7 @@ import 'location.dart';
 import 'place.dart';
 
 import 'package:flutter/material.dart';
+import 'package:enum_flag/enum_flag.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 const String mapStyle = """[
@@ -139,6 +140,7 @@ class _MapPageState extends State<MapPage> {
   CameraPosition? _cameraPos;
   bool _isSearching = false;
   Set<Marker> _markers = <Marker>{};
+  int _placeMask = PlaceType.values.flag;
 
   @override
   void initState() {
@@ -166,16 +168,19 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> searchForMarkers() async {
     setState(() => _isSearching = true);
-    int? placeMask;
 
     // Dont pask the placeMask into the search, as we want to search for all types, but only display the masked markers
     await Place.searchForPlaces(_cameraPos!.target);
-    Set<Marker> markers = Place.getPlaceMarkers(mask: placeMask).toSet();
+    await rebuildMarkers();
 
     setState(() {
-      _markers = markers;
       _isSearching = false;
     });
+  }
+
+  Future<void> rebuildMarkers() async {
+    Set<Marker> markers = Place.getPlaceMarkers(mask: _placeMask).toSet();
+    setState(() => _markers = markers);
   }
 
   Future<void> _firstLoad() async {
@@ -220,7 +225,43 @@ class _MapPageState extends State<MapPage> {
         title: Text(widget.title),
         leading: const Icon(Icons.location_on),
       ),
-      body: _createMainMap(),
+      body: Stack(
+        children: <Widget>[
+          _createMainMap(),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: PopupMenuButton(
+              iconSize: 56,
+              icon: const CircleAvatar(
+                backgroundColor: Colors.pink,
+                radius: 56,
+                child: Icon(Icons.filter_list_rounded),
+              ),
+              itemBuilder: (context) => PlaceType.values
+                  .map(
+                    (place) => PopupMenuItem(
+                      child: StatefulBuilder(
+                        builder: (context, setState) => CheckboxListTile(
+                          value: _placeMask.hasFlag(place),
+                          onChanged: (newVal) => setState(
+                            () {
+                              _placeMask = (newVal ?? false)
+                                  ? _placeMask | place.value
+                                  : _placeMask & ~place.value;
+
+                              rebuildMarkers();
+                            },
+                          ),
+                          title: Text(place.pluralName),
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _isSearching ? null : () => searchForMarkers(),
         backgroundColor: Colors.pink,
