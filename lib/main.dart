@@ -166,9 +166,11 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> searchForMarkers() async {
     setState(() => _isSearching = true);
+    int? placeMask;
 
+    // Dont pask the placeMask into the search, as we want to search for all types, but only display the masked markers
     await Place.searchForPlaces(_cameraPos!.target);
-    Set<Marker> markers = Place.getPlaceMarkers().toSet();
+    Set<Marker> markers = Place.getPlaceMarkers(mask: placeMask).toSet();
 
     setState(() {
       _markers = markers;

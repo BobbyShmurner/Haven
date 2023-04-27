@@ -12,7 +12,7 @@ enum PlaceType with EnumFlag {
   homelessShelter,
   abuse,
   police,
-  therapy,
+  suicide,
 }
 
 extension PlaceTypeExtensions on PlaceType {
@@ -29,13 +29,15 @@ extension PlaceTypeExtensions on PlaceType {
         return "Abuse Center";
       case PlaceType.police:
         return "Police Station";
-      case PlaceType.therapy:
-        return "Therapy Clinic";
+      case PlaceType.suicide:
+        return "Sucide Prevention & Awearness";
     }
   }
 
   String get keyword {
     switch (this) {
+      case PlaceType.suicide:
+        return "Suicide Help";
       default:
         return displayName;
     }
@@ -50,7 +52,7 @@ extension PlaceTypeExtensions on PlaceType {
     _createBitmapFromDefault(PlaceType.homelessShelter, 200);
     _createBitmapFromDefault(PlaceType.abuse, 140);
     _createBitmapFromDefault(PlaceType.police, 0);
-    _createBitmapFromDefault(PlaceType.therapy, 280);
+    _createBitmapFromDefault(PlaceType.suicide, 280);
   }
 
   static Future<void> _createBitmap(PlaceType type, String assetName) async {
