@@ -459,9 +459,8 @@ class _MapPageState extends State<MapPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _isSearching
-            ? null
-            : () => searchForMarkers(_cameraPos!.target, forceSearch: true),
+        onPressed:
+            _isSearching ? null : () => searchForMarkers(_cameraPos!.target),
         backgroundColor: _isSearching ? Colors.pink.shade800 : Colors.pink,
         disabledElevation: 0.0,
         icon: _isSearching
