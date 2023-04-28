@@ -131,6 +131,70 @@ class LoadingPage extends StatelessWidget {
   }
 }
 
+class MapSearchBar extends StatefulWidget {
+  const MapSearchBar({super.key});
+
+  @override
+  State<MapSearchBar> createState() => _MapSearchBarState();
+}
+
+class _MapSearchBarState extends State<MapSearchBar> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(left: 10.0, top: 4.0, right: 60.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Card(
+            child: ListTile(
+              dense: true,
+              leading: const Icon(Icons.search_rounded),
+              trailing: IconButton(
+                icon: const Icon(Icons.cancel_rounded),
+                onPressed: () => _searchController.clear(),
+              ),
+              title: TextField(
+                autocorrect: false,
+                controller: _searchController,
+                keyboardType: TextInputType.streetAddress,
+                onTapOutside: (event) => FocusScope.of(context).unfocus(),
+                decoration: const InputDecoration(
+                  hintText: 'Search',
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 290,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: 10,
+              itemBuilder: (context, i) {
+                return Card(
+                  margin: const EdgeInsets.only(
+                    left: 4,
+                    right: 4,
+                    top: 1,
+                    bottom: 1,
+                  ),
+                  child: ListTile(
+                    leading: const Icon(Icons.place_outlined),
+                    title: Text("Cool Place ${i + 1}"),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class MapPage extends StatefulWidget {
   const MapPage({super.key, required this.title});
   final String title;
@@ -140,7 +204,7 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  GoogleMapController? _controller;
+  GoogleMapController? _mapsController;
   CameraPosition? _cameraPos;
   CameraPosition? _lastCameraPos;
 
@@ -156,13 +220,13 @@ class _MapPageState extends State<MapPage> {
     Timer.periodic(
       const Duration(milliseconds: 100),
       (timer) async {
-        if (_controller == null) return;
+        if (_mapsController == null) return;
         if (_cameraPos != _lastCameraPos) {
           _lastCameraPos = _cameraPos;
           return;
         }
 
-        LatLngBounds cameraBounds = await _controller!.getVisibleRegion();
+        LatLngBounds cameraBounds = await _mapsController!.getVisibleRegion();
 
         for (LatLng bound in <LatLng>[
           cameraBounds.northeast,
@@ -217,32 +281,16 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  GoogleMap _createMainMap() {
-    return GoogleMap(
-      markers: _markers,
-      mapType: MapType.normal,
-      myLocationEnabled: true,
-      zoomControlsEnabled: false,
-      tiltGesturesEnabled: false,
-      initialCameraPosition: _cameraPos!,
-      minMaxZoomPreference: const MinMaxZoomPreference(12.0, 20.0),
-      onMapCreated: (GoogleMapController controller) {
-        _controller = controller;
-        _controller!.setMapStyle(mapStyle);
-      },
-      onCameraMove: (pos) {
-        _cameraPos = pos;
-      },
-    );
-  }
+  Future<void> searchForMarkers(LatLng searchPoint,
+      {bool forceSearch = false}) async {
+    if (_searchPoints.contains(searchPoint)) return;
+    _searchPoints.add(searchPoint);
 
-  Future<void> searchForMarkers(LatLng searchPoint) async {
     while (_isSearching) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
 
     setState(() => _isSearching = true);
-    _searchPoints.add(searchPoint);
 
     // Dont pask the placeMask into the search, as we want to search for all types, but only display the masked markers
     await Place.searchForPlaces(searchPoint, radius: searchRadius);
@@ -302,7 +350,27 @@ class _MapPageState extends State<MapPage> {
       ),
       body: Stack(
         children: <Widget>[
-          _createMainMap(),
+          Stack(
+            children: [
+              GoogleMap(
+                markers: _markers,
+                mapType: MapType.normal,
+                myLocationEnabled: true,
+                zoomControlsEnabled: false,
+                tiltGesturesEnabled: false,
+                initialCameraPosition: _cameraPos!,
+                minMaxZoomPreference: const MinMaxZoomPreference(12.0, 20.0),
+                onMapCreated: (GoogleMapController controller) {
+                  _mapsController = controller;
+                  _mapsController!.setMapStyle(mapStyle);
+                },
+                onCameraMove: (pos) {
+                  _cameraPos = pos;
+                },
+              ),
+              const MapSearchBar(),
+            ],
+          ),
           Align(
             alignment: Alignment.bottomLeft,
             child: PopupMenuButton(
