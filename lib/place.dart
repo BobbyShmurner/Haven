@@ -141,7 +141,7 @@ class Place {
   }
 
   static Future<List<Place>> searchForPlaces(LatLng searchPos,
-      {int? placeMask, int? radius}) async {
+      {int? placeMask, required int radius}) async {
     placeMask ??= PlaceType.values.flag;
 
     Iterable<PlaceType> placeTypes =
@@ -155,7 +155,7 @@ class Place {
   }
 
   static Future<void> _searchForPlacesOfType(LatLng searchPos,
-      {required PlaceType placeType, int? radius}) async {
+      {required PlaceType placeType, required int radius}) async {
     var response =
         await searchMaps(searchPos, keyword: placeType.keyword, radius: radius);
 

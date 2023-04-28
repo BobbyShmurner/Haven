@@ -1,9 +1,13 @@
 import 'location.dart';
 import 'place.dart';
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:enum_flag/enum_flag.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+const int searchRadius = 50000;
 
 const String mapStyle = """[
   {
@@ -52,7 +56,8 @@ const String mapStyle = """[
   }
 ]""";
 
-void main() {
+Future<void> main() async {
+  await PlaceTypeExtensions.init();
   runApp(const MyApp());
 }
 
@@ -135,9 +140,11 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
-  late GoogleMapController _controller;
-
+  GoogleMapController? _controller;
   CameraPosition? _cameraPos;
+  CameraPosition? _lastCameraPos;
+
+  final List<LatLng> _searchPoints = <LatLng>[];
   bool _isSearching = false;
   Set<Marker> _markers = <Marker>{};
   int _placeMask = PlaceType.values.flag;
@@ -145,32 +152,100 @@ class _MapPageState extends State<MapPage> {
   @override
   void initState() {
     super.initState();
-    PlaceTypeExtensions.init();
+
+    Timer.periodic(
+      const Duration(milliseconds: 100),
+      (timer) async {
+        if (_controller == null) return;
+        if (_cameraPos != _lastCameraPos) {
+          _lastCameraPos = _cameraPos;
+          return;
+        }
+
+        LatLngBounds cameraBounds = await _controller!.getVisibleRegion();
+
+        for (LatLng bound in <LatLng>[
+          cameraBounds.northeast,
+          cameraBounds.southwest,
+        ]) {
+          for (LatLng existingSearchPoint in _searchPoints) {
+            if (existingSearchPoint.dist(bound) < searchRadius * 0.75) {
+              return;
+            }
+          }
+        }
+
+        _lastCameraPos = _cameraPos;
+        searchForMarkers(_cameraPos!.target);
+
+        // --- NOTE: This code below works, but it can get quite expensive ---
+
+        // // We walk from the top right to bottom left, moving down then left
+        // LatLng searchPos = cameraBounds.northeast;
+        // LatLng lowerBound = cameraBounds.southwest.offset(
+        //   -searchRadius.toDouble(),
+        //   -searchRadius.toDouble(),
+        // );
+
+        // while (true) {
+        //   bool shouldSearch = true;
+        //   for (LatLng existingSearchPoint in _searchPoints) {
+        //     if (existingSearchPoint.dist(searchPos) < searchRadius) {
+        //       shouldSearch = false;
+        //       break;
+        //     }
+        //   }
+
+        //   if (shouldSearch) {
+        //     searchForMarkers(searchPos);
+        //   }
+
+        //   searchPos = searchPos.offset(-2.0 * searchRadius, 0);
+        //   if (searchPos.latitude < lowerBound.latitude) {
+        //     searchPos = LatLng(
+        //       cameraBounds.northeast.latitude,
+        //       searchPos.offset(0, -2.0 * searchRadius).longitude,
+        //     );
+        //   }
+        //   if (searchPos.longitude < lowerBound.longitude) {
+        //     break;
+        //   }
+        // }
+        //
+        // -------------------------------------------------------------------
+      },
+    );
   }
 
   GoogleMap _createMainMap() {
     return GoogleMap(
+      markers: _markers,
       mapType: MapType.normal,
       myLocationEnabled: true,
       zoomControlsEnabled: false,
       tiltGesturesEnabled: false,
       initialCameraPosition: _cameraPos!,
+      minMaxZoomPreference: const MinMaxZoomPreference(12.0, 20.0),
       onMapCreated: (GoogleMapController controller) {
         _controller = controller;
-        _controller.setMapStyle(mapStyle);
+        _controller!.setMapStyle(mapStyle);
       },
-      markers: _markers,
       onCameraMove: (pos) {
         _cameraPos = pos;
       },
     );
   }
 
-  Future<void> searchForMarkers() async {
+  Future<void> searchForMarkers(LatLng searchPoint) async {
+    while (_isSearching) {
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+
     setState(() => _isSearching = true);
+    _searchPoints.add(searchPoint);
 
     // Dont pask the placeMask into the search, as we want to search for all types, but only display the masked markers
-    await Place.searchForPlaces(_cameraPos!.target);
+    await Place.searchForPlaces(searchPoint, radius: searchRadius);
     await rebuildMarkers();
 
     setState(() {
@@ -193,12 +268,12 @@ class _MapPageState extends State<MapPage> {
       );
     } catch (_) {
       _cameraPos = const CameraPosition(
-        target: LatLng(54.330483122642576, -4.557963944971561),
+        target: LatLng(54.5869277, -5.9377212),
         zoom: 5.45,
       );
     }
 
-    await searchForMarkers();
+    await searchForMarkers(_cameraPos!.target);
   }
 
   @override
@@ -263,8 +338,10 @@ class _MapPageState extends State<MapPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _isSearching ? null : () => searchForMarkers(),
-        backgroundColor: Colors.pink,
+        onPressed:
+            _isSearching ? null : () => searchForMarkers(_cameraPos!.target),
+        backgroundColor: _isSearching ? Colors.pink.shade800 : Colors.pink,
+        disabledElevation: 0.0,
         icon: _isSearching
             ? const SizedBox(
                 width: 25,
