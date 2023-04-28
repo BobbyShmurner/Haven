@@ -1,4 +1,4 @@
-import 'location.dart';
+import 'maps_api.dart' as maps_api;
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:enum_flag/enum_flag.dart';
@@ -86,8 +86,8 @@ extension PlaceTypeExtensions on PlaceType {
 class Place {
   final String id;
   final String name;
-  final PlaceType type;
   final LatLng position;
+  final PlaceType? type;
 
   late InfoWindow _info;
   Marker? _marker;
@@ -98,21 +98,26 @@ class Place {
   Place({
     required this.name,
     required this.id,
-    required this.type,
     required this.position,
+    this.type,
   }) {
-    _info = InfoWindow(title: name, snippet: type.displayName);
+    _info = InfoWindow(title: name, snippet: type?.displayName);
   }
 
   Marker get marker {
     _marker ??= Marker(
       markerId: MarkerId(id),
       position: position,
-      icon: type.icon,
       infoWindow: _info,
+      icon: type != null ? type!.icon : BitmapDescriptor.defaultMarker,
     );
 
     return _marker!;
+  }
+
+  static Future<Place> fromPlaceId(String placeId) async {
+    var response = await maps_api.getPlaceDetials(placeId);
+    return _parsePlace(response['result'], placeId: placeId);
   }
 
   static List<Place> getPlaces({int? mask}) {
@@ -156,8 +161,8 @@ class Place {
 
   static Future<void> _searchForPlacesOfType(LatLng searchPos,
       {required PlaceType placeType, required int radius}) async {
-    var response =
-        await searchMaps(searchPos, keyword: placeType.keyword, radius: radius);
+    var response = await maps_api.searchMaps(searchPos,
+        keyword: placeType.keyword, radius: radius);
 
     for (Map<String, dynamic> placeResponse in response['results']) {
       if (!placeResponse.containsKey("geometry") ||
@@ -166,16 +171,11 @@ class Place {
         continue;
       }
 
-      String placeId = placeResponse['place_id'];
-      String placeName = placeResponse['name'];
-
-      LatLng placePos = LatLng(
-        placeResponse['geometry']['location']['lat'],
-        placeResponse['geometry']['location']['lng'],
+      Place place = _parsePlace(
+        placeResponse,
+        placeId: placeResponse['place_id'],
+        placeType: placeType,
       );
-
-      Place place = Place(
-          id: placeId, name: placeName, type: placeType, position: placePos);
 
       if (_cachedPlaces.containsKey(placeType)) {
         if (_cachedPlaces[placeType]!.contains(place)) continue;
@@ -184,5 +184,22 @@ class Place {
         _cachedPlaces[placeType] = <Place>[place];
       }
     }
+  }
+
+  static Place _parsePlace(Map<String, dynamic> response,
+      {required String placeId, PlaceType? placeType}) {
+    String placeName = response['name'];
+
+    LatLng placePos = LatLng(
+      response['geometry']['location']['lat'],
+      response['geometry']['location']['lng'],
+    );
+
+    return Place(
+      id: placeId,
+      name: placeName,
+      position: placePos,
+      type: placeType,
+    );
   }
 }

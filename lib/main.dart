@@ -1,7 +1,9 @@
+import 'autocomplete.dart';
 import 'location.dart';
 import 'place.dart';
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:enum_flag/enum_flag.dart';
@@ -132,7 +134,14 @@ class LoadingPage extends StatelessWidget {
 }
 
 class MapSearchBar extends StatefulWidget {
-  const MapSearchBar({super.key});
+  const MapSearchBar({
+    super.key,
+    this.cameraPos,
+    this.onAutocompleTapped,
+  });
+
+  final CameraPosition? cameraPos;
+  final void Function(AutocompleteResult)? onAutocompleTapped;
 
   @override
   State<MapSearchBar> createState() => _MapSearchBarState();
@@ -140,56 +149,97 @@ class MapSearchBar extends StatefulWidget {
 
 class _MapSearchBarState extends State<MapSearchBar> {
   final TextEditingController _searchController = TextEditingController();
+  List<AutocompleteResult> _autocompleteResults = <AutocompleteResult>[];
+
+  bool showAutocomplete = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _searchController.addListener(() async {
+      var results = await AutocompleteResult.get(
+        _searchController.text,
+        location: widget.cameraPos?.target,
+        radius: searchRadius,
+      );
+
+      setState(() => _autocompleteResults = results);
+    });
+  }
+
+  void unfocus() {
+    showAutocomplete = false;
+    FocusScope.of(context).unfocus();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(left: 10.0, top: 4.0, right: 60.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Card(
-            child: ListTile(
-              dense: true,
-              leading: const Icon(Icons.search_rounded),
-              trailing: IconButton(
-                icon: const Icon(Icons.cancel_rounded),
-                onPressed: () => _searchController.clear(),
-              ),
-              title: TextField(
-                autocorrect: false,
-                controller: _searchController,
-                keyboardType: TextInputType.streetAddress,
-                onTapOutside: (event) => FocusScope.of(context).unfocus(),
-                decoration: const InputDecoration(
-                  hintText: 'Search',
-                  border: InputBorder.none,
+      child: TapRegion(
+        onTapOutside: (event) => unfocus(),
+        child: Column(
+          children: [
+            Card(
+              child: ListTile(
+                dense: true,
+                leading: const Icon(Icons.search_rounded),
+                trailing: IconButton(
+                  icon: const Icon(Icons.cancel_rounded),
+                  onPressed: () => _searchController.clear(),
+                ),
+                title: TextField(
+                  autocorrect: false,
+                  controller: _searchController,
+                  keyboardType: TextInputType.streetAddress,
+                  onTap: () => showAutocomplete = true,
+                  decoration: const InputDecoration(
+                    hintText: 'Search',
+                    border: InputBorder.none,
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(
-            height: 290,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: 10,
-              itemBuilder: (context, i) {
-                return Card(
-                  margin: const EdgeInsets.only(
-                    left: 4,
-                    right: 4,
-                    top: 1,
-                    bottom: 1,
+            if (showAutocomplete)
+              Column(
+                children: [
+                  SizedBox(
+                    height: math.min(_autocompleteResults.length * 58, 58 * 3),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemBuilder: (context, i) {
+                        if (i >= _autocompleteResults.length) return null;
+
+                        return GestureDetector(
+                          onTap: widget.onAutocompleTapped != null
+                              ? () {
+                                  unfocus();
+
+                                  widget.onAutocompleTapped!(
+                                      _autocompleteResults[i]);
+                                }
+                              : null,
+                          child: Card(
+                            margin: const EdgeInsets.only(
+                              left: 4,
+                              right: 4,
+                              top: 1,
+                              bottom: 1,
+                            ),
+                            child: ListTile(
+                              leading: const Icon(Icons.place_rounded),
+                              title: Text(_autocompleteResults[i].name),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                  child: ListTile(
-                    leading: const Icon(Icons.place_outlined),
-                    title: Text("Cool Place ${i + 1}"),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
+                ],
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -350,26 +400,29 @@ class _MapPageState extends State<MapPage> {
       ),
       body: Stack(
         children: <Widget>[
-          Stack(
-            children: [
-              GoogleMap(
-                markers: _markers,
-                mapType: MapType.normal,
-                myLocationEnabled: true,
-                zoomControlsEnabled: false,
-                tiltGesturesEnabled: false,
-                initialCameraPosition: _cameraPos!,
-                minMaxZoomPreference: const MinMaxZoomPreference(12.0, 20.0),
-                onMapCreated: (GoogleMapController controller) {
-                  _mapsController = controller;
-                  _mapsController!.setMapStyle(mapStyle);
-                },
-                onCameraMove: (pos) {
-                  _cameraPos = pos;
-                },
-              ),
-              const MapSearchBar(),
-            ],
+          GoogleMap(
+            markers: _markers,
+            mapType: MapType.normal,
+            myLocationEnabled: true,
+            zoomControlsEnabled: false,
+            tiltGesturesEnabled: false,
+            initialCameraPosition: _cameraPos!,
+            minMaxZoomPreference: const MinMaxZoomPreference(12.0, 20.0),
+            onMapCreated: (GoogleMapController controller) {
+              _mapsController = controller;
+              _mapsController!.setMapStyle(mapStyle);
+            },
+            onCameraMove: (pos) {
+              _cameraPos = pos;
+            },
+          ),
+          MapSearchBar(
+            cameraPos: _cameraPos,
+            onAutocompleTapped: (autocomplete) async {
+              Place place = await autocomplete.toPlace();
+              _mapsController
+                  ?.animateCamera(CameraUpdate.newLatLng(place.position));
+            },
           ),
           Align(
             alignment: Alignment.bottomLeft,
