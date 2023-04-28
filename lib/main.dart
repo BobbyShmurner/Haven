@@ -178,7 +178,7 @@ class _MapSearchBarState extends State<MapSearchBar> {
     return Container(
       margin: const EdgeInsets.only(left: 10.0, right: 60.0),
       child: TapRegion(
-        onTapOutside: (event) => unfocus(),
+        onTapOutside: (_) => unfocus(),
         child: Column(
           children: [
             Card(
@@ -196,6 +196,7 @@ class _MapSearchBarState extends State<MapSearchBar> {
                   controller: _searchController,
                   keyboardType: TextInputType.streetAddress,
                   onTap: () => showAutocomplete = true,
+                  onSubmitted: (_) => unfocus(),
                   decoration: const InputDecoration(
                     hintText: 'Search',
                     border: InputBorder.none,
