@@ -176,7 +176,7 @@ class _MapSearchBarState extends State<MapSearchBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(left: 10.0, top: 4.0, right: 60.0),
+      margin: const EdgeInsets.only(left: 10.0, right: 60.0),
       child: TapRegion(
         onTapOutside: (event) => unfocus(),
         child: Column(
