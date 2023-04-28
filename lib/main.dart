@@ -416,6 +416,8 @@ class _MapPageState extends State<MapPage> {
             cameraPos: _cameraPos,
             onAutocompleTapped: (autocomplete) async {
               Place place = await autocomplete.toPlace();
+
+              searchForMarkers(place.position);
               _mapsController
                   ?.animateCamera(CameraUpdate.newLatLng(place.position));
             },
