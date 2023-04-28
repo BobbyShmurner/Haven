@@ -278,19 +278,6 @@ class _MapPageState extends State<MapPage> {
           return;
         }
 
-        LatLngBounds cameraBounds = await _mapsController!.getVisibleRegion();
-
-        for (LatLng bound in <LatLng>[
-          cameraBounds.northeast,
-          cameraBounds.southwest,
-        ]) {
-          for (LatLng existingSearchPoint in _searchPoints) {
-            if (existingSearchPoint.dist(bound) < searchRadius * 0.75) {
-              return;
-            }
-          }
-        }
-
         _lastCameraPos = _cameraPos;
         searchForMarkers(_cameraPos!.target);
 
@@ -340,6 +327,13 @@ class _MapPageState extends State<MapPage> {
 
     while (_isSearching) {
       await Future.delayed(const Duration(milliseconds: 100));
+    }
+
+    for (LatLng existingSearchPoint in _searchPoints) {
+      if (searchPoint == existingSearchPoint) continue;
+      if (existingSearchPoint.dist(searchPoint) < searchRadius * 0.75) {
+        return;
+      }
     }
 
     setState(() => _isSearching = true);
@@ -477,7 +471,7 @@ class _MapPageState extends State<MapPage> {
                 Icons.location_on_outlined,
                 size: 25.0,
               ),
-        label: const Text("Search For Markers"),
+        label: Text(_isSearching ? "Searching..." : "Search For Markers"),
       ),
     );
   }
