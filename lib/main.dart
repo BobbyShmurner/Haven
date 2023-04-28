@@ -322,17 +322,19 @@ class _MapPageState extends State<MapPage> {
 
   Future<void> searchForMarkers(LatLng searchPoint,
       {bool forceSearch = false}) async {
-    if (_searchPoints.contains(searchPoint)) return;
+    if (!forceSearch && _searchPoints.contains(searchPoint)) return;
     _searchPoints.add(searchPoint);
 
     while (_isSearching) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
 
-    for (LatLng existingSearchPoint in _searchPoints) {
-      if (searchPoint == existingSearchPoint) continue;
-      if (existingSearchPoint.dist(searchPoint) < searchRadius * 0.75) {
-        return;
+    if (!forceSearch) {
+      for (LatLng existingSearchPoint in _searchPoints) {
+        if (searchPoint == existingSearchPoint) continue;
+        if (existingSearchPoint.dist(searchPoint) < searchRadius * 0.75) {
+          return;
+        }
       }
     }
 
@@ -457,8 +459,9 @@ class _MapPageState extends State<MapPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed:
-            _isSearching ? null : () => searchForMarkers(_cameraPos!.target),
+        onPressed: _isSearching
+            ? null
+            : () => searchForMarkers(_cameraPos!.target, forceSearch: true),
         backgroundColor: _isSearching ? Colors.pink.shade800 : Colors.pink,
         disabledElevation: 0.0,
         icon: _isSearching
