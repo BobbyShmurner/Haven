@@ -185,10 +185,12 @@ class _MapSearchBarState extends State<MapSearchBar> {
               child: ListTile(
                 dense: true,
                 leading: const Icon(Icons.search_rounded),
-                trailing: IconButton(
-                  icon: const Icon(Icons.cancel_rounded),
-                  onPressed: () => _searchController.clear(),
-                ),
+                trailing: _searchController.text.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.cancel_rounded),
+                        onPressed: () => _searchController.clear(),
+                      ),
                 title: TextField(
                   autocorrect: false,
                   controller: _searchController,
@@ -366,7 +368,7 @@ class _MapPageState extends State<MapPage> {
       );
     } catch (_) {
       _cameraPos = const CameraPosition(
-        target: LatLng(54.5869277, -5.9377212),
+        target: LatLng(54.5869277, -5.9377212), // Kainos, Belfast
         zoom: 5.45,
       );
     }
@@ -407,7 +409,7 @@ class _MapPageState extends State<MapPage> {
             zoomControlsEnabled: false,
             tiltGesturesEnabled: false,
             initialCameraPosition: _cameraPos!,
-            minMaxZoomPreference: const MinMaxZoomPreference(12.0, 20.0),
+            minMaxZoomPreference: const MinMaxZoomPreference(10.0, 20.0),
             onMapCreated: (GoogleMapController controller) {
               _mapsController = controller;
               _mapsController!.setMapStyle(mapStyle);
