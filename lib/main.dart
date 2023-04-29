@@ -418,7 +418,8 @@ class _MapPageState extends State<MapPage> {
           MapSearchBar(
             cameraPos: _cameraPos,
             onAutocompleTapped: (autocomplete) async {
-              Place place = await autocomplete.toPlace();
+              Place? place = await autocomplete.toPlace();
+              if (place == null) return;
 
               searchForMarkers(place.position);
               _mapsController

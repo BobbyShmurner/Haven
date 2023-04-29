@@ -4,8 +4,10 @@ import 'dart:convert';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 
-Future<Map<String, dynamic>> searchMaps(LatLng location,
+Future<Map<String, dynamic>?> searchMaps(LatLng location,
     {String? keyword, required int radius}) async {
+  if (radius <= 0) return null;
+
   String url =
       "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location.latitude},${location.longitude}&radius=$radius&key=${Env.mapsApiKey}";
   if (keyword != null) url += "&keyword=$keyword";
@@ -16,8 +18,10 @@ Future<Map<String, dynamic>> searchMaps(LatLng location,
   return jsonDecode(response.body);
 }
 
-Future<Map<String, dynamic>> getPlaceDetials(String placeId,
+Future<Map<String, dynamic>?> getPlaceDetials(String placeId,
     {List<String> fields = const ["name", "geometry"]}) async {
+  if (placeId.isEmpty) return null;
+
   String url =
       "https://maps.googleapis.com/maps/api/place/details/json?place_id=$placeId&fields=${fields.join('%2C')}&key=${Env.mapsApiKey}";
 
@@ -27,8 +31,10 @@ Future<Map<String, dynamic>> getPlaceDetials(String placeId,
   return jsonDecode(response.body);
 }
 
-Future<Map<String, dynamic>> autocomplete(String keyword,
+Future<Map<String, dynamic>?> autocomplete(String keyword,
     {LatLng? location, required int radius}) async {
+  if (keyword.isEmpty || radius <= 0) return null;
+
   String url =
       "https://maps.googleapis.com/maps/api/place/autocomplete/json?input=$keyword&radius=$radius&key=${Env.mapsApiKey}";
   if (location != null) {

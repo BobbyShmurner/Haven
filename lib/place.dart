@@ -115,8 +115,10 @@ class Place {
     return _marker!;
   }
 
-  static Future<Place> fromPlaceId(String placeId) async {
+  static Future<Place?> fromPlaceId(String placeId) async {
     var response = await maps_api.getPlaceDetials(placeId);
+    if (response == null) return null;
+
     return _parsePlace(response['result'], placeId: placeId);
   }
 
@@ -163,6 +165,8 @@ class Place {
       {required PlaceType placeType, required int radius}) async {
     var response = await maps_api.searchMaps(searchPos,
         keyword: placeType.keyword, radius: radius);
+
+    if (response == null) return;
 
     for (Map<String, dynamic> placeResponse in response['results']) {
       if (!placeResponse.containsKey("geometry") ||

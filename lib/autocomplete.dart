@@ -11,8 +11,10 @@ class AutocompleteResult {
 
   static Future<List<AutocompleteResult>> get(String keyword,
       {LatLng? location, required int radius}) async {
-    var response = await maps_api.autocomplete(keyword,
+    Map<String, dynamic>? response = await maps_api.autocomplete(keyword,
         radius: radius, location: location);
+
+    if (response == null) return [];
 
     List<AutocompleteResult> results = <AutocompleteResult>[];
 
@@ -32,7 +34,7 @@ class AutocompleteResult {
     return results;
   }
 
-  Future<Place> toPlace() async {
+  Future<Place?> toPlace() async {
     return await Place.fromPlaceId(placeId);
   }
 }
