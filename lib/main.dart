@@ -4,6 +4,7 @@ import 'src/place.dart';
 import 'widgets/loading_page.dart';
 import 'widgets/place_details.dart';
 import 'widgets/map_search_bar.dart';
+import 'widgets/loading_indicator.dart';
 
 import 'dart:async';
 
@@ -251,10 +252,10 @@ class _MapPageState extends State<MapPage> {
                             .map(
                               (place) => PopupMenuItem(
                                 child: StatefulBuilder(
-                                  builder: (context, setState) =>
+                                  builder: (context, localSetState) =>
                                       CheckboxListTile(
                                     value: _placeMask.hasFlag(place),
-                                    onChanged: (newVal) => setState(
+                                    onChanged: (newVal) => localSetState(
                                       () {
                                         _placeMask = (newVal ?? false)
                                             ? _placeMask | place.value
@@ -306,6 +307,9 @@ class _MapPageState extends State<MapPage> {
                 ],
               ),
             ],
+          ),
+          LoadingIndicator(
+            active: _isSearching,
           ),
         ],
       ),
