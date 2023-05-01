@@ -47,6 +47,10 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+	<string>tel</string>
+	</array>
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>Need location when in use</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

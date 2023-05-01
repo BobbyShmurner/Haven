@@ -90,8 +90,11 @@ class PlaceDetails {
   late LatLng position;
   late PlaceType? type;
   late String? url;
+  late String? formattedAddress;
   late bool? wheelchairAccessibleEntrance;
   late String? website;
+  late String? formattedPhoneNumber;
+  late String? internationalPhoneNumber;
   late double? rating;
   late int? userRatingsTotal;
 
@@ -99,12 +102,15 @@ class PlaceDetails {
     required this.id,
     required this.name,
     required this.position,
-    this.rating,
-    this.userRatingsTotal,
     this.type,
     this.url,
+    this.formattedAddress,
     this.wheelchairAccessibleEntrance,
     this.website,
+    this.formattedPhoneNumber,
+    this.internationalPhoneNumber,
+    this.rating,
+    this.userRatingsTotal,
   });
 
   PlaceDetails.fromJson(Map<String, dynamic> json,
@@ -115,10 +121,13 @@ class PlaceDetails {
 
     // Baisc
     url = json['url'];
+    formattedAddress = json['formatted_address'];
     wheelchairAccessibleEntrance = json['wheelchair_accessible_entrance'];
 
     // Contact
     website = json['website'];
+    formattedPhoneNumber = json['formatted_phone_number'];
+    internationalPhoneNumber = json['international_phone_number'];
 
     // Atmosphere
     rating = json['rating'] != null ? (json['rating'] as num).toDouble() : null;

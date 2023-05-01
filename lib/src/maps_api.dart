@@ -57,6 +57,9 @@ Future<Map<String, dynamic>?> getPlaceDetails(
     "wheelchair_accessible_entrance",
     "rating",
     "user_ratings_total",
+    "formatted_address",
+    "international_phone_number",
+    "formatted_phone_number",
   ],
 }) async {
   if (placeId.trim().isEmpty) return null;

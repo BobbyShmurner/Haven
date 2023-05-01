@@ -335,9 +335,14 @@ class _MapPageState extends State<MapPage> {
                                   type: PlaceType.suicide,
                                   rating: 4.2,
                                   userRatingsTotal: 31,
-                                  wheelchairAccessibleEntrance: false,
+                                  wheelchairAccessibleEntrance: true,
                                   url:
                                       "https://maps.google.com/?cid=1603406668482336744",
+                                  website: "https://google.com",
+                                  formattedAddress:
+                                      "Unit 2, North City Business Centre, 2 Duncairn Gardens, Belfast BT15 2GG, UK",
+                                  formattedPhoneNumber: "(02) 9374 4000",
+                                  internationalPhoneNumber: "+61 2 9374 4000",
                                 ),
                               ),
                       ],
