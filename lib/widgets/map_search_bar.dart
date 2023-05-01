@@ -1,4 +1,5 @@
 import '../src/autocomplete.dart';
+import 'autocomplete_button.dart';
 
 import 'dart:math' as math;
 
@@ -86,7 +87,8 @@ class _MapSearchBarState extends State<MapSearchBar> {
                       itemBuilder: (context, i) {
                         if (i >= _autocompleteResults.length) return null;
 
-                        return GestureDetector(
+                        return AutocompleteButton(
+                          text: Text(_autocompleteResults[i].name),
                           onTap: widget.onAutocompleTapped != null
                               ? () {
                                   unfocus();
@@ -95,18 +97,6 @@ class _MapSearchBarState extends State<MapSearchBar> {
                                       _autocompleteResults[i]);
                                 }
                               : null,
-                          child: Card(
-                            margin: const EdgeInsets.only(
-                              left: 4,
-                              right: 4,
-                              top: 1,
-                              bottom: 1,
-                            ),
-                            child: ListTile(
-                              leading: const Icon(Icons.place_rounded),
-                              title: Text(_autocompleteResults[i].name),
-                            ),
-                          ),
                         );
                       },
                     ),
