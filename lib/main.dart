@@ -214,6 +214,7 @@ class _MapPageState extends State<MapPage> {
               markers: _markers,
               mapType: MapType.normal,
               myLocationEnabled: true,
+              mapToolbarEnabled: false,
               zoomControlsEnabled: false,
               tiltGesturesEnabled: false,
               initialCameraPosition: _cameraPos!,
