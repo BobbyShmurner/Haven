@@ -2,6 +2,7 @@ import 'src/location.dart';
 import 'src/place.dart';
 
 import 'widgets/loading_page.dart';
+import 'widgets/place_details.dart';
 import 'widgets/map_search_bar.dart';
 
 import 'dart:async';
@@ -89,21 +90,23 @@ class MapPage extends StatefulWidget {
 }
 
 class _MapPageState extends State<MapPage> {
+  final List<LatLng> _searchPoints = <LatLng>[];
+
   GoogleMapController? _mapsController;
   CameraPosition? _cameraPos;
   CameraPosition? _lastCameraPos;
 
-  final List<LatLng> _searchPoints = <LatLng>[];
   bool _isSearching = false;
   Set<Marker> _markers = <Marker>{};
   int _placeMask = PlaceType.values.flag;
+  Place? _selectedPlace;
 
   @override
   void initState() {
     super.initState();
 
     Timer.periodic(
-      const Duration(milliseconds: 100),
+      const Duration(seconds: 1),
       (timer) async {
         if (_mapsController == null) return;
         if (_cameraPos != _lastCameraPos) {
@@ -112,69 +115,29 @@ class _MapPageState extends State<MapPage> {
         }
 
         _lastCameraPos = _cameraPos;
-        searchForMarkers(_cameraPos!.target);
-
-        // --- NOTE: This code below works, but it can get quite expensive ---
-
-        // // We walk from the top right to bottom left, moving down then left
-        // LatLng searchPos = cameraBounds.northeast;
-        // LatLng lowerBound = cameraBounds.southwest.offset(
-        //   -searchRadius.toDouble(),
-        //   -searchRadius.toDouble(),
-        // );
-
-        // while (true) {
-        //   bool shouldSearch = true;
-        //   for (LatLng existingSearchPoint in _searchPoints) {
-        //     if (existingSearchPoint.dist(searchPos) < searchRadius) {
-        //       shouldSearch = false;
-        //       break;
-        //     }
-        //   }
-
-        //   if (shouldSearch) {
-        //     searchForMarkers(searchPos);
-        //   }
-
-        //   searchPos = searchPos.offset(-2.0 * searchRadius, 0);
-        //   if (searchPos.latitude < lowerBound.latitude) {
-        //     searchPos = LatLng(
-        //       cameraBounds.northeast.latitude,
-        //       searchPos.offset(0, -2.0 * searchRadius).longitude,
-        //     );
-        //   }
-        //   if (searchPos.longitude < lowerBound.longitude) {
-        //     break;
-        //   }
-        // }
-        //
-        // -------------------------------------------------------------------
+        fetchMarkers(_cameraPos!.target);
       },
     );
   }
 
-  Future<void> searchForMarkers(LatLng searchPoint,
-      {bool forceSearch = false}) async {
-    if (!forceSearch && _searchPoints.contains(searchPoint)) return;
+  Future<void> fetchMarkers(LatLng searchPoint) async {
+    if (_searchPoints.contains(searchPoint)) return;
     _searchPoints.add(searchPoint);
 
     while (_isSearching) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
 
-    if (!forceSearch) {
-      for (LatLng existingSearchPoint in _searchPoints) {
-        if (searchPoint == existingSearchPoint) continue;
-        if (existingSearchPoint.dist(searchPoint) < searchRadius * 0.75) {
-          return;
-        }
+    for (LatLng existingSearchPoint in _searchPoints) {
+      if (searchPoint == existingSearchPoint) continue;
+      if (existingSearchPoint.dist(searchPoint) < searchRadius * 0.75) {
+        return;
       }
     }
 
     setState(() => _isSearching = true);
 
-    // Dont pask the placeMask into the search, as we want to search for all types, but only display the masked markers
-    await Place.searchForPlaces(searchPoint, radius: searchRadius);
+    await Place.fetchPlaces(searchPoint, radius: searchRadius);
     await rebuildMarkers();
 
     setState(() {
@@ -183,7 +146,12 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> rebuildMarkers() async {
-    Set<Marker> markers = Place.getPlaceMarkers(mask: _placeMask).toSet();
+    Set<Marker> markers = Place.getPlaceMarkers(
+      mask: _placeMask,
+      onTap: (place) {
+        setState(() => _selectedPlace = place);
+      },
+    ).toSet();
     setState(() => _markers = markers);
   }
 
@@ -202,7 +170,7 @@ class _MapPageState extends State<MapPage> {
       );
     }
 
-    await searchForMarkers(_cameraPos!.target);
+    await fetchMarkers(_cameraPos!.target);
   }
 
   @override
@@ -258,12 +226,12 @@ class _MapPageState extends State<MapPage> {
                     MapSearchBar(
                       cameraPos: _cameraPos,
                       onAutocompleTapped: (autocomplete) async {
-                        Place? place = await autocomplete.toPlace();
+                        Place? place = await autocomplete.fetchPlace();
                         if (place == null) return;
 
-                        searchForMarkers(place.position);
                         _mapsController?.animateCamera(
-                            CameraUpdate.newLatLng(place.position));
+                          CameraUpdate.newLatLng(place.position),
+                        );
                       },
                     ),
                     Align(
@@ -327,10 +295,10 @@ class _MapPageState extends State<MapPage> {
                     child: SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: const [
-                          Align(
-                            child: Text("Hello World!"),
-                          ),
+                        children: [
+                          _selectedPlace != null
+                              ? PlaceDetails(_selectedPlace!)
+                              : const Text("No Place Selected"),
                         ],
                       ),
                     ),

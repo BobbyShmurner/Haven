@@ -31,7 +31,7 @@ class _MapSearchBarState extends State<MapSearchBar> {
     super.initState();
 
     _searchController.addListener(() async {
-      var results = await AutocompleteResult.get(
+      var results = await AutocompleteResult.fetch(
         _searchController.text,
         location: widget.cameraPos?.target,
         radius: 50000,

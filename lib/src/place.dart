@@ -92,8 +92,10 @@ class Place {
   late InfoWindow _info;
   Marker? _marker;
 
-  static final Map<PlaceType, List<Place>> _cachedPlaces =
+  static final Map<PlaceType, List<Place>> _cachedPlacesOfType =
       <PlaceType, List<Place>>{};
+
+  static final Map<String, Place> _cachedPlaces = <String, Place>{};
 
   Place({
     required this.name,
@@ -104,22 +106,28 @@ class Place {
     _info = InfoWindow(title: name, snippet: type?.displayName);
   }
 
-  Marker get marker {
+  Marker createMarker(void Function(Place)? onTap) {
     _marker ??= Marker(
       markerId: MarkerId(id),
       position: position,
       infoWindow: _info,
       icon: type != null ? type!.icon : BitmapDescriptor.defaultMarker,
+      onTap: onTap != null ? () => onTap(this) : null,
     );
 
     return _marker!;
   }
 
-  static Future<Place?> fromPlaceId(String placeId) async {
+  static Future<Place?> fetchPlacefromId(String placeId) async {
+    if (_cachedPlaces.containsKey(placeId)) return _cachedPlaces[placeId];
+
     var response = await maps_api.getPlaceDetials(placeId);
     if (response == null) return null;
 
-    return _parsePlace(response['result'], placeId: placeId);
+    Place? place = _parsePlace(response['result'], placeId: placeId);
+    _cachedPlaces[placeId] = place;
+
+    return place;
   }
 
   static List<Place> getPlaces({int? mask}) {
@@ -130,24 +138,25 @@ class Place {
         mask.getFlags(PlaceType.values) as Iterable<PlaceType>;
 
     for (PlaceType type in placeTypes) {
-      if (!Place._cachedPlaces.containsKey(type)) continue;
-      places.addAll(Place._cachedPlaces[type]!);
+      if (!Place._cachedPlacesOfType.containsKey(type)) continue;
+      places.addAll(Place._cachedPlacesOfType[type]!);
     }
 
     return places;
   }
 
-  static List<Marker> getPlaceMarkers({int? mask}) {
+  static List<Marker> getPlaceMarkers(
+      {int? mask, void Function(Place)? onTap}) {
     List<Marker> markers = <Marker>[];
 
     for (Place place in Place.getPlaces(mask: mask)) {
-      markers.add(place.marker);
+      markers.add(place.createMarker(onTap));
     }
 
     return markers;
   }
 
-  static Future<List<Place>> searchForPlaces(LatLng searchPos,
+  static Future<List<Place>> fetchPlaces(LatLng searchPos,
       {int? placeMask, required int radius}) async {
     placeMask ??= PlaceType.values.flag;
 
@@ -155,13 +164,13 @@ class Place {
         placeMask.getFlags(PlaceType.values) as Iterable<PlaceType>;
 
     for (PlaceType type in placeTypes) {
-      await _searchForPlacesOfType(searchPos, placeType: type, radius: radius);
+      await _fetchPlacesOfType(searchPos, placeType: type, radius: radius);
     }
 
     return getPlaces(mask: placeMask);
   }
 
-  static Future<void> _searchForPlacesOfType(LatLng searchPos,
+  static Future<void> _fetchPlacesOfType(LatLng searchPos,
       {required PlaceType placeType, required int radius}) async {
     var response = await maps_api.searchMaps(searchPos,
         keyword: placeType.keyword, radius: radius);
@@ -181,11 +190,13 @@ class Place {
         placeType: placeType,
       );
 
-      if (_cachedPlaces.containsKey(placeType)) {
-        if (_cachedPlaces[placeType]!.contains(place)) continue;
-        _cachedPlaces[placeType]!.add(place);
+      _cachedPlaces[placeResponse['place_id']] = place;
+
+      if (_cachedPlacesOfType.containsKey(placeType)) {
+        if (_cachedPlacesOfType[placeType]!.contains(place)) continue;
+        _cachedPlacesOfType[placeType]!.add(place);
       } else {
-        _cachedPlaces[placeType] = <Place>[place];
+        _cachedPlacesOfType[placeType] = <Place>[place];
       }
     }
   }
