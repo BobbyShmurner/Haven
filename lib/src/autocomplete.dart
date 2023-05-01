@@ -16,15 +16,18 @@ class AutocompleteResult {
   AutocompleteResult({required this.placeId, required this.name});
 
   static Future<List<AutocompleteResult>> fetch(String keyword,
-      {LatLng? location, required int radius}) async {
+      {LatLng? location}) async {
     String searchTerm = keyword.toLowerCase().trim();
 
     if (_cachedResults.containsKey(searchTerm)) {
       return _cachedResults[searchTerm]!;
     }
 
-    Map<String, dynamic>? response = await maps_api.autocomplete(searchTerm,
-        radius: radius, location: location);
+    List<dynamic>? response = await maps_api.autocomplete(
+      searchTerm,
+      location: location,
+      radius: 50000,
+    );
 
     if (response == null) {
       _cachedResults[searchTerm] = [];
@@ -33,7 +36,7 @@ class AutocompleteResult {
 
     List<AutocompleteResult> results = <AutocompleteResult>[];
 
-    for (Map<String, dynamic> autocomplete in response['predictions']) {
+    for (Map<String, dynamic> autocomplete in response) {
       if (!autocomplete.containsKey("place_id")) {
         continue;
       }

@@ -121,10 +121,10 @@ class Place {
   static Future<Place?> fetchPlacefromId(String placeId) async {
     if (_cachedPlaces.containsKey(placeId)) return _cachedPlaces[placeId];
 
-    var response = await maps_api.getPlaceDetials(placeId);
+    Map<String, dynamic>? response = await maps_api.getPlaceDetails(placeId);
     if (response == null) return null;
 
-    Place? place = _parsePlace(response['result'], placeId: placeId);
+    Place? place = _parsePlace(response, placeId: placeId);
     _cachedPlaces[placeId] = place;
 
     return place;
@@ -172,12 +172,15 @@ class Place {
 
   static Future<void> _fetchPlacesOfType(LatLng searchPos,
       {required PlaceType placeType, required int radius}) async {
-    var response = await maps_api.searchMaps(searchPos,
-        keyword: placeType.keyword, radius: radius);
+    List<dynamic>? response = await maps_api.searchMaps(
+      placeType.keyword,
+      location: searchPos,
+      radius: radius,
+    );
 
     if (response == null) return;
 
-    for (Map<String, dynamic> placeResponse in response['results']) {
+    for (Map<String, dynamic> placeResponse in response) {
       if (!placeResponse.containsKey("geometry") ||
           !placeResponse.containsKey("place_id") ||
           !placeResponse.containsKey("name")) {
