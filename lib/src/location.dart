@@ -10,6 +10,13 @@ extension PositionExtensions on Position {
 }
 
 extension LatLngExtensions on LatLng {
+  static LatLng fromGeometryJson(Map<String, dynamic> geometryJson) {
+    return LatLng(
+      geometryJson['location']['lat'],
+      geometryJson['location']['lng'],
+    );
+  }
+
   double dist(LatLng other) {
     // Convert from degrees to radians
     final latA = latitude * 0.0174533;

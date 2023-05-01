@@ -1,4 +1,5 @@
 import 'maps_api.dart' as maps_api;
+import 'location.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:enum_flag/enum_flag.dart';
@@ -83,11 +84,55 @@ extension PlaceTypeExtensions on PlaceType {
   }
 }
 
+class PlaceDetails {
+  late String id;
+  late String name;
+  late LatLng position;
+  late PlaceType? type;
+  late String? url;
+  late bool? wheelchairAccessibleEntrance;
+  late String? website;
+  late double? rating;
+  late int? userRatingsTotal;
+
+  PlaceDetails({
+    required this.id,
+    required this.name,
+    required this.position,
+    this.rating,
+    this.userRatingsTotal,
+    this.type,
+    this.url,
+    this.wheelchairAccessibleEntrance,
+    this.website,
+  });
+
+  PlaceDetails.fromJson(Map<String, dynamic> json,
+      {required this.type, required this.id}) {
+    // Required
+    name = json['name']!;
+    position = LatLngExtensions.fromGeometryJson(json['geometry']!);
+
+    // Baisc
+    url = json['url'];
+    wheelchairAccessibleEntrance = json['wheelchair_accessible_entrance'];
+
+    // Contact
+    website = json['website'];
+
+    // Atmosphere
+    rating = json['rating'] != null ? (json['rating'] as num).toDouble() : null;
+    userRatingsTotal = json['user_ratings_total'];
+  }
+}
+
 class Place {
   final String id;
   final String name;
   final LatLng position;
   final PlaceType? type;
+
+  PlaceDetails? detials;
 
   late InfoWindow _info;
   Marker? _marker;
@@ -96,6 +141,8 @@ class Place {
       <PlaceType, List<Place>>{};
 
   static final Map<String, Place> _cachedPlaces = <String, Place>{};
+  static final Map<String, PlaceDetails> _cachedPlaceDetails =
+      <String, PlaceDetails>{};
 
   Place({
     required this.name,
@@ -118,13 +165,32 @@ class Place {
     return _marker!;
   }
 
-  static Future<Place?> fetchPlacefromId(String placeId) async {
-    if (_cachedPlaces.containsKey(placeId)) return _cachedPlaces[placeId];
+  Future<PlaceDetails?> fetchPlaceDetails() async {
+    if (_cachedPlaceDetails.containsKey(id)) {
+      return _cachedPlaceDetails[id];
+    }
 
-    Map<String, dynamic>? response = await maps_api.getPlaceDetails(placeId);
+    Map<String, dynamic>? response = await maps_api.getPlaceDetails(id);
     if (response == null) return null;
 
-    Place? place = _parsePlace(response, placeId: placeId);
+    PlaceDetails details = PlaceDetails.fromJson(
+      response,
+      type: type,
+      id: id,
+    );
+    _cachedPlaceDetails[id] = details;
+
+    return details;
+  }
+
+  static Future<Place?> fetchBasicPlaceFromId(String placeId) async {
+    if (_cachedPlaces.containsKey(placeId)) return _cachedPlaces[placeId];
+
+    Map<String, dynamic>? response =
+        await maps_api.getBasicPlaceDetails(placeId);
+    if (response == null) return null;
+
+    Place place = _parsePlace(response, placeId: placeId);
     _cachedPlaces[placeId] = place;
 
     return place;
@@ -208,10 +274,7 @@ class Place {
       {required String placeId, PlaceType? placeType}) {
     String placeName = response['name'];
 
-    LatLng placePos = LatLng(
-      response['geometry']['location']['lat'],
-      response['geometry']['location']['lng'],
-    );
+    LatLng placePos = LatLngExtensions.fromGeometryJson(response['geometry']);
 
     return Place(
       id: placeId,

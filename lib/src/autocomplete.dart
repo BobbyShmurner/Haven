@@ -56,7 +56,7 @@ class AutocompleteResult {
   Future<Place?> fetchPlace() async {
     if (_searchedForPlace) return _place;
 
-    _place = await Place.fetchPlacefromId(placeId);
+    _place = await Place.fetchBasicPlaceFromId(placeId);
     _searchedForPlace = true;
     return _place;
   }

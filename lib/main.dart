@@ -1,3 +1,4 @@
+import 'src/maps_api.dart' as maps_api;
 import 'src/location.dart';
 import 'src/place.dart';
 
@@ -293,15 +294,53 @@ class _MapPageState extends State<MapPage> {
                   Container(
                     height: 300,
                     color: Colors.white,
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _selectedPlace != null
-                              ? PlaceDetails(_selectedPlace!)
-                              : const Text("No Place Selected"),
-                        ],
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        maps_api.isApiEnabled
+                            ? _selectedPlace != null
+                                ? FutureBuilder(
+                                    future: _selectedPlace!.fetchPlaceDetails(),
+                                    builder: ((context, snapshot) {
+                                      if (snapshot.connectionState !=
+                                          ConnectionState.done) {
+                                        return const Center(
+                                          child: Text(
+                                            "Loading...",
+                                            style: TextStyle(
+                                              fontSize: 30,
+                                            ),
+                                          ),
+                                        );
+                                      }
+
+                                      return PlaceDetailsWidget(snapshot.data!);
+                                    }),
+                                  )
+                                : const Center(
+                                    child: Text(
+                                      "No Place Selected!",
+                                      style: TextStyle(
+                                        fontSize: 30,
+                                      ),
+                                    ),
+                                  )
+                            : PlaceDetailsWidget(
+                                PlaceDetails(
+                                  id: "Id",
+                                  name: "Test Place",
+                                  position: _cameraPos!.target,
+                                  type: PlaceType.suicide,
+                                  rating: 4.2,
+                                  userRatingsTotal: 31,
+                                  wheelchairAccessibleEntrance: false,
+                                  url:
+                                      "https://maps.google.com/?cid=1603406668482336744",
+                                ),
+                              ),
+                      ],
                     ),
                   ),
                 ],

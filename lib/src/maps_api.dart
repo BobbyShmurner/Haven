@@ -10,11 +10,13 @@ import 'package:http/http.dart' as http;
 Logger log = Logger(printer: PrettyPrinter());
 
 // Keep this line in this format so you can easily change it
-const enableApi = kDebugMode ? false : true;
+const isApiEnabled = kDebugMode ? false : true;
+
+const basicFields = ["name", "geometry"];
 
 Future<dynamic> _genericApiCall(String url,
     {required String apiName, required String returnKey}) async {
-  if (!enableApi) return null;
+  if (!isApiEnabled) return null;
 
   log.i("Calling \"$apiName\" API...\nRequest: $url");
   url += "&key=${Env.mapsApiKey}";
@@ -35,7 +37,7 @@ Future<List<dynamic>?> searchMaps(
   if (radius <= 0 || keyword.trim().isEmpty) return null;
 
   String url =
-      "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location.latitude},${location.longitude}&radius=$radius&keyword=$keyword";
+      "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${location.latitude},${location.longitude}&radius=$radius&keyword=$keyword&fields=${basicFields.join(',')}";
 
   dynamic response = await _genericApiCall(
     url,
@@ -48,7 +50,14 @@ Future<List<dynamic>?> searchMaps(
 
 Future<Map<String, dynamic>?> getPlaceDetails(
   String placeId, {
-  List<String> fields = const ["name", "geometry", "url"],
+  List<String> fields = const [
+    "name",
+    "geometry",
+    "url",
+    "wheelchair_accessible_entrance",
+    "rating",
+    "user_ratings_total",
+  ],
 }) async {
   if (placeId.trim().isEmpty) return null;
 
@@ -62,6 +71,14 @@ Future<Map<String, dynamic>?> getPlaceDetails(
   );
 
   return response;
+}
+
+Future<Map<String, dynamic>?> getBasicPlaceDetails(
+  String placeId,
+) async {
+  if (placeId.trim().isEmpty) return null;
+
+  return await getPlaceDetails(placeId, fields: basicFields);
 }
 
 Future<List<dynamic>?> autocomplete(
