@@ -1,4 +1,4 @@
-package com.example.kainos_map
+package com.bobbyshmurner.haven
 
 import io.flutter.embedding.android.FlutterActivity
 

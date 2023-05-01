@@ -1,4 +1,5 @@
-# kainos_map
+# Haven
+Find safety and comfort near you
 
 ## Note about IOS
 While the app _should_ work on IOS, I don't own any apple devices and wasn't able to build or test it.

@@ -83,11 +83,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Kainos Map',
+      title: 'Haven',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MapPage(title: "Kainos Map"),
+      home: const MapPage(title: "Haven "),
     );
   }
 }
