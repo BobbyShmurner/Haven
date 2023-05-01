@@ -257,12 +257,28 @@ class _MapPageState extends State<MapPage> {
                       child: PopupMenuButton(
                         position: PopupMenuPosition.under,
                         iconSize: 56,
-                        icon: const CircleAvatar(
-                          backgroundColor: Colors.pink,
-                          radius: 56,
-                          child: Icon(
-                            Icons.filter_list_rounded,
-                            color: Colors.white,
+                        icon: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.transparent,
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(56),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.2),
+                                spreadRadius: 3,
+                                blurRadius: 3,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: const CircleAvatar(
+                            backgroundColor: Colors.pink,
+                            radius: 56,
+                            child: Icon(
+                              Icons.filter_list_rounded,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                         itemBuilder: (context) => PlaceType.values
