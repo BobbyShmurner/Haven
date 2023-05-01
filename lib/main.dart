@@ -229,105 +229,113 @@ class _MapPageState extends State<MapPage> {
         title: Text(widget.title),
         leading: const Icon(Icons.location_on),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          Expanded(
-            child: Stack(
-              children: <Widget>[
-                GoogleMap(
-                  markers: _markers,
-                  mapType: MapType.normal,
-                  myLocationEnabled: true,
-                  zoomControlsEnabled: false,
-                  tiltGesturesEnabled: false,
-                  initialCameraPosition: _cameraPos!,
-                  minMaxZoomPreference: const MinMaxZoomPreference(10.0, 20.0),
-                  onMapCreated: (GoogleMapController controller) {
-                    _mapsController = controller;
-                    _mapsController!.setMapStyle(mapStyle);
-                  },
-                  onCameraMove: (pos) {
-                    _cameraPos = pos;
-                  },
-                ),
-                MapSearchBar(
-                  cameraPos: _cameraPos,
-                  onAutocompleTapped: (autocomplete) async {
-                    Place? place = await autocomplete.toPlace();
-                    if (place == null) return;
-
-                    searchForMarkers(place.position);
-                    _mapsController
-                        ?.animateCamera(CameraUpdate.newLatLng(place.position));
-                  },
-                ),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: PopupMenuButton(
-                    position: PopupMenuPosition.under,
-                    iconSize: 56,
-                    icon: const CircleAvatar(
-                      backgroundColor: Colors.pink,
-                      radius: 56,
-                      child: Icon(
-                        Icons.filter_list_rounded,
-                        color: Colors.white,
-                      ),
-                    ),
-                    itemBuilder: (context) => PlaceType.values
-                        .map(
-                          (place) => PopupMenuItem(
-                            child: StatefulBuilder(
-                              builder: (context, setState) => CheckboxListTile(
-                                value: _placeMask.hasFlag(place),
-                                onChanged: (newVal) => setState(
-                                  () {
-                                    _placeMask = (newVal ?? false)
-                                        ? _placeMask | place.value
-                                        : _placeMask & ~place.value;
-
-                                    rebuildMarkers();
-                                  },
-                                ),
-                                title: Text(place.pluralName),
-                              ),
-                            ),
-                          ),
-                        )
-                        .toList(),
-                  ),
-                ),
-              ],
+          Padding(
+            padding: const EdgeInsets.only(bottom: 58.0),
+            child: GoogleMap(
+              markers: _markers,
+              mapType: MapType.normal,
+              myLocationEnabled: true,
+              zoomControlsEnabled: false,
+              tiltGesturesEnabled: false,
+              initialCameraPosition: _cameraPos!,
+              minMaxZoomPreference: const MinMaxZoomPreference(10.0, 20.0),
+              onMapCreated: (GoogleMapController controller) {
+                _mapsController = controller;
+                _mapsController!.setMapStyle(mapStyle);
+              },
+              onCameraMove: (pos) {
+                _cameraPos = pos;
+              },
             ),
           ),
-          ExpansionTile(
-            collapsedBackgroundColor: Colors.blue,
-            backgroundColor: Colors.blue,
-            iconColor: Colors.white,
-            collapsedIconColor: Colors.white,
-            textColor: Colors.white,
-            collapsedTextColor: Colors.white,
-            title: const Text(
-              "Place Details",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
-              ),
-            ),
+          Column(
             children: [
-              Container(
-                height: 300,
-                color: Colors.white,
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: const [
-                      Align(
-                        child: Text("Hello World!"),
+              Expanded(
+                child: Stack(
+                  children: <Widget>[
+                    MapSearchBar(
+                      cameraPos: _cameraPos,
+                      onAutocompleTapped: (autocomplete) async {
+                        Place? place = await autocomplete.toPlace();
+                        if (place == null) return;
+
+                        searchForMarkers(place.position);
+                        _mapsController?.animateCamera(
+                            CameraUpdate.newLatLng(place.position));
+                      },
+                    ),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: PopupMenuButton(
+                        position: PopupMenuPosition.under,
+                        iconSize: 56,
+                        icon: const CircleAvatar(
+                          backgroundColor: Colors.pink,
+                          radius: 56,
+                          child: Icon(
+                            Icons.filter_list_rounded,
+                            color: Colors.white,
+                          ),
+                        ),
+                        itemBuilder: (context) => PlaceType.values
+                            .map(
+                              (place) => PopupMenuItem(
+                                child: StatefulBuilder(
+                                  builder: (context, setState) =>
+                                      CheckboxListTile(
+                                    value: _placeMask.hasFlag(place),
+                                    onChanged: (newVal) => setState(
+                                      () {
+                                        _placeMask = (newVal ?? false)
+                                            ? _placeMask | place.value
+                                            : _placeMask & ~place.value;
+
+                                        rebuildMarkers();
+                                      },
+                                    ),
+                                    title: Text(place.pluralName),
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
                       ),
-                    ],
+                    ),
+                  ],
+                ),
+              ),
+              ExpansionTile(
+                collapsedBackgroundColor: Colors.blue,
+                backgroundColor: Colors.blue,
+                iconColor: Colors.white,
+                collapsedIconColor: Colors.white,
+                textColor: Colors.white,
+                collapsedTextColor: Colors.white,
+                title: const Text(
+                  "Place Details",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
                   ),
                 ),
+                children: [
+                  Container(
+                    height: 300,
+                    color: Colors.white,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: const [
+                          Align(
+                            child: Text("Hello World!"),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
