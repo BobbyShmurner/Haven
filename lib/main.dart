@@ -9,6 +9,7 @@ import 'widgets/loading_indicator.dart';
 
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:enum_flag/enum_flag.dart';
@@ -64,7 +65,14 @@ const String mapStyle = """[
 ]""";
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   await PlaceTypeExtensions.init();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   runApp(const MyApp());
 }
 
