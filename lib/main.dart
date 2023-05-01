@@ -397,87 +397,109 @@ class _MapPageState extends State<MapPage> {
         title: Text(widget.title),
         leading: const Icon(Icons.location_on),
       ),
-      body: Stack(
-        children: <Widget>[
-          GoogleMap(
-            markers: _markers,
-            mapType: MapType.normal,
-            myLocationEnabled: true,
-            zoomControlsEnabled: false,
-            tiltGesturesEnabled: false,
-            initialCameraPosition: _cameraPos!,
-            minMaxZoomPreference: const MinMaxZoomPreference(10.0, 20.0),
-            onMapCreated: (GoogleMapController controller) {
-              _mapsController = controller;
-              _mapsController!.setMapStyle(mapStyle);
-            },
-            onCameraMove: (pos) {
-              _cameraPos = pos;
-            },
-          ),
-          MapSearchBar(
-            cameraPos: _cameraPos,
-            onAutocompleTapped: (autocomplete) async {
-              Place? place = await autocomplete.toPlace();
-              if (place == null) return;
+      body: Column(
+        children: [
+          Expanded(
+            child: Stack(
+              children: <Widget>[
+                GoogleMap(
+                  markers: _markers,
+                  mapType: MapType.normal,
+                  myLocationEnabled: true,
+                  zoomControlsEnabled: false,
+                  tiltGesturesEnabled: false,
+                  initialCameraPosition: _cameraPos!,
+                  minMaxZoomPreference: const MinMaxZoomPreference(10.0, 20.0),
+                  onMapCreated: (GoogleMapController controller) {
+                    _mapsController = controller;
+                    _mapsController!.setMapStyle(mapStyle);
+                  },
+                  onCameraMove: (pos) {
+                    _cameraPos = pos;
+                  },
+                ),
+                MapSearchBar(
+                  cameraPos: _cameraPos,
+                  onAutocompleTapped: (autocomplete) async {
+                    Place? place = await autocomplete.toPlace();
+                    if (place == null) return;
 
-              searchForMarkers(place.position);
-              _mapsController
-                  ?.animateCamera(CameraUpdate.newLatLng(place.position));
-            },
-          ),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: PopupMenuButton(
-              iconSize: 56,
-              icon: const CircleAvatar(
-                backgroundColor: Colors.pink,
-                radius: 56,
-                child: Icon(Icons.filter_list_rounded),
-              ),
-              itemBuilder: (context) => PlaceType.values
-                  .map(
-                    (place) => PopupMenuItem(
-                      child: StatefulBuilder(
-                        builder: (context, setState) => CheckboxListTile(
-                          value: _placeMask.hasFlag(place),
-                          onChanged: (newVal) => setState(
-                            () {
-                              _placeMask = (newVal ?? false)
-                                  ? _placeMask | place.value
-                                  : _placeMask & ~place.value;
-
-                              rebuildMarkers();
-                            },
-                          ),
-                          title: Text(place.pluralName),
-                        ),
+                    searchForMarkers(place.position);
+                    _mapsController
+                        ?.animateCamera(CameraUpdate.newLatLng(place.position));
+                  },
+                ),
+                Align(
+                  alignment: Alignment.bottomRight,
+                  child: PopupMenuButton(
+                    position: PopupMenuPosition.under,
+                    iconSize: 56,
+                    icon: const CircleAvatar(
+                      backgroundColor: Colors.pink,
+                      radius: 56,
+                      child: Icon(
+                        Icons.filter_list_rounded,
+                        color: Colors.white,
                       ),
                     ),
-                  )
-                  .toList(),
+                    itemBuilder: (context) => PlaceType.values
+                        .map(
+                          (place) => PopupMenuItem(
+                            child: StatefulBuilder(
+                              builder: (context, setState) => CheckboxListTile(
+                                value: _placeMask.hasFlag(place),
+                                onChanged: (newVal) => setState(
+                                  () {
+                                    _placeMask = (newVal ?? false)
+                                        ? _placeMask | place.value
+                                        : _placeMask & ~place.value;
+
+                                    rebuildMarkers();
+                                  },
+                                ),
+                                title: Text(place.pluralName),
+                              ),
+                            ),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed:
-            _isSearching ? null : () => searchForMarkers(_cameraPos!.target),
-        backgroundColor: _isSearching ? Colors.pink.shade800 : Colors.pink,
-        disabledElevation: 0.0,
-        icon: _isSearching
-            ? const SizedBox(
-                width: 25,
-                height: 25,
-                child: CircularProgressIndicator(
-                  color: Colors.white,
-                ),
-              )
-            : const Icon(
-                Icons.location_on_outlined,
-                size: 25.0,
+          ExpansionTile(
+            collapsedBackgroundColor: Colors.blue,
+            backgroundColor: Colors.blue,
+            iconColor: Colors.white,
+            collapsedIconColor: Colors.white,
+            textColor: Colors.white,
+            collapsedTextColor: Colors.white,
+            title: const Text(
+              "Place Details",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
               ),
-        label: Text(_isSearching ? "Searching..." : "Search For Markers"),
+            ),
+            children: [
+              Container(
+                height: 300,
+                color: Colors.white,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: const [
+                      Align(
+                        child: Text("Hello World!"),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
