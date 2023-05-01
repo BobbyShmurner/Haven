@@ -1,0 +1,121 @@
+import '../src/autocomplete.dart';
+
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+
+class MapSearchBar extends StatefulWidget {
+  const MapSearchBar({
+    super.key,
+    this.cameraPos,
+    this.onAutocompleTapped,
+  });
+
+  final CameraPosition? cameraPos;
+  final void Function(AutocompleteResult)? onAutocompleTapped;
+
+  @override
+  State<MapSearchBar> createState() => _MapSearchBarState();
+}
+
+class _MapSearchBarState extends State<MapSearchBar> {
+  final TextEditingController _searchController = TextEditingController();
+  List<AutocompleteResult> _autocompleteResults = <AutocompleteResult>[];
+
+  bool showAutocomplete = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _searchController.addListener(() async {
+      var results = await AutocompleteResult.get(
+        _searchController.text,
+        location: widget.cameraPos?.target,
+        radius: 50000,
+      );
+
+      setState(() => _autocompleteResults = results);
+    });
+  }
+
+  void unfocus() {
+    showAutocomplete = false;
+    FocusScope.of(context).unfocus();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(left: 10.0, right: 60.0),
+      child: TapRegion(
+        onTapOutside: (_) => unfocus(),
+        child: Column(
+          children: [
+            Card(
+              child: ListTile(
+                dense: true,
+                leading: const Icon(Icons.search_rounded),
+                trailing: _searchController.text.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.cancel_rounded),
+                        onPressed: () => _searchController.clear(),
+                      ),
+                title: TextField(
+                  autocorrect: false,
+                  controller: _searchController,
+                  keyboardType: TextInputType.streetAddress,
+                  onTap: () => showAutocomplete = true,
+                  onSubmitted: (_) => unfocus(),
+                  decoration: const InputDecoration(
+                    hintText: 'Search',
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+            ),
+            if (showAutocomplete)
+              Column(
+                children: [
+                  SizedBox(
+                    height: math.min(_autocompleteResults.length * 58, 58 * 3),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemBuilder: (context, i) {
+                        if (i >= _autocompleteResults.length) return null;
+
+                        return GestureDetector(
+                          onTap: widget.onAutocompleTapped != null
+                              ? () {
+                                  unfocus();
+
+                                  widget.onAutocompleTapped!(
+                                      _autocompleteResults[i]);
+                                }
+                              : null,
+                          child: Card(
+                            margin: const EdgeInsets.only(
+                              left: 4,
+                              right: 4,
+                              top: 1,
+                              bottom: 1,
+                            ),
+                            child: ListTile(
+                              leading: const Icon(Icons.place_rounded),
+                              title: Text(_autocompleteResults[i].name),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
