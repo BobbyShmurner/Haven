@@ -1,16 +1,23 @@
 # kainos_map
 
-A new Flutter project.
+## Note about IOS
+While the app _should_ work on IOS, I don't own any apple devices and wasn't able to build or test it.
 
-## Getting Started
+# How to setup the API Key
 
-This project is a starting point for a Flutter application.
+1. Create a `.env` file in the root of the project and add the following (Without the asterisks):
+```
+MAPS_API_KEY=*YOUR_API_KEY*
+```
 
-A few resources to get you started if this is your first Flutter project:
+2. Execute `flutter pub run build_runner build` in the root of the project
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Android Setup
+Add the following to your `android/local.properties` (Again, without the asterisks):
+```
+mapsApiKey=*YOUR_API_KEY*
+```
+**Note:** If the `local.properties` doesn't exist, you may need to build the app for android at least once first
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## IOS Setup
+Replace `MAPS_API_KEY` in the `ios/Runner/AppDelegate.swift` file with your Api Key
