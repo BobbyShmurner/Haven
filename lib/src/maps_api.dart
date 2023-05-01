@@ -9,9 +9,7 @@ import 'package:http/http.dart' as http;
 
 Logger log = Logger(printer: PrettyPrinter());
 
-// Keep this line in this format so you can easily change it
-const isApiEnabled = kDebugMode ? false : true;
-
+bool isApiEnabled = !kDebugMode;
 const basicFields = ["name", "geometry"];
 
 Future<dynamic> _genericApiCall(String url,

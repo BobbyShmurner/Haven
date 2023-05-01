@@ -10,6 +10,7 @@ import 'widgets/loading_indicator.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:enum_flag/enum_flag.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -122,8 +123,11 @@ class _MapPageState extends State<MapPage> {
     );
   }
 
-  Future<void> fetchMarkers(LatLng searchPoint) async {
-    if (_searchPoints.contains(searchPoint)) return;
+  Future<void> fetchMarkers(
+    LatLng searchPoint, {
+    bool shouldRebuildMarkers = true,
+  }) async {
+    if (!maps_api.isApiEnabled || _searchPoints.contains(searchPoint)) return;
     _searchPoints.add(searchPoint);
 
     while (_isSearching) {
@@ -140,7 +144,7 @@ class _MapPageState extends State<MapPage> {
     setState(() => _isSearching = true);
 
     await Place.fetchPlaces(searchPoint, radius: searchRadius);
-    await rebuildMarkers();
+    if (shouldRebuildMarkers) await rebuildMarkers();
 
     setState(() {
       _isSearching = false;
@@ -172,7 +176,10 @@ class _MapPageState extends State<MapPage> {
       );
     }
 
-    await fetchMarkers(_cameraPos!.target);
+    // Don't rebuild inside of the fetch, cus if the fetch returns early (for whatever reason)
+    // The map won't ever be created
+    await fetchMarkers(_cameraPos!.target, shouldRebuildMarkers: false);
+    await rebuildMarkers();
   }
 
   @override
@@ -273,6 +280,24 @@ class _MapPageState extends State<MapPage> {
                             .toList(),
                       ),
                     ),
+                    if (kDebugMode)
+                      Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
+                          child: FloatingActionButton.extended(
+                            backgroundColor: Colors.pink,
+                            icon: const Icon(Icons.api),
+                            onPressed: () => setState(
+                              () => maps_api.isApiEnabled =
+                                  !maps_api.isApiEnabled,
+                            ),
+                            label: Text(maps_api.isApiEnabled
+                                ? "Disable API"
+                                : "Enable API"),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
