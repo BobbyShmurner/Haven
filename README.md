@@ -20,5 +20,11 @@ mapsApiKey=*YOUR_API_KEY*
 ```
 **Note:** If the `local.properties` doesn't exist, you may need to build the app for android at least once first
 
+
+Both of these changes can be commited safely without the api key being commited to the repo. **The same cannot be said for the IOS Setup!**
+
 ## IOS Setup
 Replace `MAPS_API_KEY` in the `ios/Runner/AppDelegate.swift` file with your Api Key
+
+
+**WARNING: DO NOT COMMIT THIS CHANGE, OR ELSE YOUR API KEY WILL BE STORED IN THE REPO!!**
