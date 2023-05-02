@@ -212,7 +212,51 @@ class _MapPageState extends State<MapPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        leading: const Icon(Icons.location_on),
+        // leading: const Icon(Icons.location_on),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Align(
+                child: ListTile(
+                  textColor: Colors.white,
+                  title: Text(
+                    "Haven",
+                    style: TextStyle(
+                      fontSize: 52,
+                    ),
+                  ),
+                  subtitle: Text("Find safety and comfort near you"),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.chat),
+              title: const Text("Messages"),
+              onTap: () => Navigator.pop(context),
+            ),
+            if (kDebugMode) ...[
+              const Divider(),
+              ListTile(
+                leading: const Icon(Icons.api),
+                title: Text(
+                  maps_api.isApiEnabled ? "Disable API" : "Enable API",
+                ),
+                onTap: () {
+                  setState(
+                    () => maps_api.isApiEnabled = !maps_api.isApiEnabled,
+                  );
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ],
+        ),
       ),
       body: Stack(
         children: [
@@ -305,24 +349,6 @@ class _MapPageState extends State<MapPage> {
                             .toList(),
                       ),
                     ),
-                    if (kDebugMode)
-                      Align(
-                        alignment: Alignment.bottomLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: FloatingActionButton.extended(
-                            backgroundColor: Colors.pink,
-                            icon: const Icon(Icons.api),
-                            onPressed: () => setState(
-                              () => maps_api.isApiEnabled =
-                                  !maps_api.isApiEnabled,
-                            ),
-                            label: Text(maps_api.isApiEnabled
-                                ? "Disable API"
-                                : "Enable API"),
-                          ),
-                        ),
-                      ),
                   ],
                 ),
               ),
