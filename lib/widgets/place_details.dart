@@ -26,20 +26,45 @@ class PlaceDetailsWidget extends StatelessWidget {
               ListTile(
                 visualDensity: VisualDensity.comfortable,
                 contentPadding: EdgeInsets.zero,
-                title: Row(
-                  children: [
-                    Text(
-                      details.name,
-                      style: const TextStyle(fontSize: 28),
-                    ),
-                    if (details.verified) ...const [
-                      SizedBox(width: 10),
-                      Icon(
-                        Icons.verified,
-                        color: Colors.blue,
-                      ),
+                // title: Row(
+                //   mainAxisSize: MainAxisSize.min,
+                //   children: [
+                //     Expanded(
+                //       child: Text(
+                //         details.name,
+                //         style: const TextStyle(fontSize: 28),
+                //       ),
+                //     ),
+                //     if (details.verified) ...const [
+                //       SizedBox(width: 10),
+                //       Icon(
+                //         Icons.verified,
+                //         color: Colors.blue,
+                //       ),
+                //     ],
+                //   ],
+                // ),
+                title: Text.rich(
+                  TextSpan(
+                    style: const TextStyle(fontSize: 28),
+                    children: [
+                      TextSpan(text: details.name),
+                      if (details.verified)
+                        WidgetSpan(
+                          alignment: PlaceholderAlignment.middle,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              SizedBox(width: 10),
+                              Icon(
+                                Icons.verified,
+                                color: Colors.blue,
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
-                  ],
+                  ),
                 ),
                 subtitle: Column(
                   mainAxisSize: MainAxisSize.min,
