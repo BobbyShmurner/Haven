@@ -64,13 +64,18 @@ class _ChatPageState extends State<ChatPage> {
                     Row(
                       children: [
                         if (message.isFromMe) const Spacer(),
-                        MessageBubble(
-                          message: message,
-                          backgroundColor: message.isFromMe
-                              ? Theme.of(context).primaryColor
-                              : Colors.grey.shade300,
-                          textColor:
-                              message.isFromMe ? Colors.white : Colors.black,
+                        Container(
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.9,
+                          ),
+                          child: MessageBubble(
+                            message: message,
+                            backgroundColor: message.isFromMe
+                                ? Theme.of(context).primaryColor
+                                : Colors.grey.shade300,
+                            textColor:
+                                message.isFromMe ? Colors.white : Colors.black,
+                          ),
                         ),
                         if (!message.isFromMe) const Spacer(),
                       ],
@@ -103,7 +108,7 @@ class _ChatPageState extends State<ChatPage> {
               children: [
                 Expanded(
                   child: ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(100)),
+                    borderRadius: const BorderRadius.all(Radius.circular(25)),
                     child: Container(
                       color: Theme.of(context).primaryColor,
                       child: Padding(
@@ -115,7 +120,8 @@ class _ChatPageState extends State<ChatPage> {
                             fontWeight: FontWeight.w600,
                           ),
                           textCapitalization: TextCapitalization.sentences,
-                          keyboardType: TextInputType.text,
+                          keyboardType: TextInputType.multiline,
+                          maxLines: null,
                           cursorColor: Colors.white,
                           decoration: const InputDecoration(
                             hintText: 'Type Message',
