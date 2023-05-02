@@ -213,6 +213,7 @@ class _MapPageState extends State<MapPage> {
     }
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: Text(widget.title),
       ),
