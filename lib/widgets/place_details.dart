@@ -4,9 +4,9 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../src/place.dart';
 import '../src/messages.dart';
+import '../pages/chat.dart';
 
 import 'rating.dart';
-import 'chat_page.dart';
 
 class PlaceDetailsWidget extends StatelessWidget {
   const PlaceDetailsWidget(

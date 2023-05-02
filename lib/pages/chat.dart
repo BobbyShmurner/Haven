@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:haven/src/date_time_extensions.dart';
 
-import 'message_bubble.dart';
+import '../widgets/message_bubble.dart';
 
 import '../src/messages.dart';
 

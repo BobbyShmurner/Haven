@@ -3,9 +3,10 @@ import 'src/messages.dart';
 import 'src/location.dart';
 import 'src/place.dart';
 
-import 'widgets/chat_list_page.dart';
-import 'widgets/loading_page.dart';
-import 'widgets/login_page.dart';
+import 'pages/chat_list.dart';
+import 'pages/loading.dart';
+import 'pages/login.dart';
+
 import 'widgets/place_details.dart';
 import 'widgets/map_search_bar.dart';
 import 'widgets/loading_indicator.dart';

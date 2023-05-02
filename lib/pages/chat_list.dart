@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../src/messages.dart';
+import '../widgets/chat_preview.dart';
 
-import 'chat_page.dart';
-import 'chat_preview.dart';
+import 'chat.dart';
 
 class ChatListPage extends StatefulWidget {
   const ChatListPage({super.key});
