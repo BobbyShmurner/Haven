@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
-  // TODO: Add Login"
+  // TODO: Add Login
   final _loginSnackBar = const SnackBar(
     content: Text("TODO: Add Login"),
   );
