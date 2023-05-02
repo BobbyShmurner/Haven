@@ -85,10 +85,12 @@ extension PlaceTypeExtensions on PlaceType {
 }
 
 class PlaceDetails {
-  late String id;
+  final String id;
+  final PlaceType? type;
+  final bool verified;
+
   late String name;
   late LatLng position;
-  late PlaceType? type;
   late String? url;
   late String? formattedAddress;
   late bool? wheelchairAccessibleEntrance;
@@ -102,6 +104,7 @@ class PlaceDetails {
     required this.id,
     required this.name,
     required this.position,
+    required this.verified,
     this.type,
     this.url,
     this.formattedAddress,
@@ -113,8 +116,12 @@ class PlaceDetails {
     this.userRatingsTotal,
   });
 
-  PlaceDetails.fromJson(Map<String, dynamic> json,
-      {required this.type, required this.id}) {
+  PlaceDetails.fromJson(
+    Map<String, dynamic> json, {
+    required this.type,
+    required this.id,
+    required this.verified,
+  }) {
     // Required
     name = json['name']!;
     position = LatLngExtensions.fromGeometryJson(json['geometry']!);
@@ -140,6 +147,7 @@ class Place {
   final String name;
   final LatLng position;
   final PlaceType? type;
+  final bool verified;
 
   PlaceDetails? detials;
 
@@ -157,6 +165,7 @@ class Place {
     required this.name,
     required this.id,
     required this.position,
+    required this.verified,
     this.type,
   }) {
     _info = InfoWindow(title: name, snippet: type?.displayName);
@@ -186,6 +195,7 @@ class Place {
       response,
       type: type,
       id: id,
+      verified: verified,
     );
     _cachedPlaceDetails[id] = details;
 
@@ -290,6 +300,7 @@ class Place {
       name: placeName,
       position: placePos,
       type: placeType,
+      verified: placeId == "id",
     );
   }
 }

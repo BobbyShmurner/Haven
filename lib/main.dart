@@ -419,6 +419,7 @@ class _MapPageState extends State<MapPage> {
                                       "Unit 2, North City Business Centre, 2 Duncairn Gardens, Belfast BT15 2GG, UK",
                                   formattedPhoneNumber: "(02) 9374 4000",
                                   internationalPhoneNumber: "+61 2 9374 4000",
+                                  verified: true,
                                 ),
                               ),
                       ],

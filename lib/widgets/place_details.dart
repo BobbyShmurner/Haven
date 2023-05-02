@@ -26,9 +26,18 @@ class PlaceDetailsWidget extends StatelessWidget {
               ListTile(
                 visualDensity: VisualDensity.comfortable,
                 contentPadding: EdgeInsets.zero,
-                title: Text(
-                  details.name,
-                  style: const TextStyle(fontSize: 28),
+                title: Row(
+                  children: [
+                    Text(
+                      details.name,
+                      style: const TextStyle(fontSize: 28),
+                    ),
+                    if (details.verified)
+                      const Icon(
+                        Icons.verified,
+                        color: Colors.blue,
+                      ),
+                  ],
                 ),
                 subtitle: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -93,33 +102,46 @@ class PlaceDetailsWidget extends StatelessWidget {
                 ),
               ),
               if (details.website != null ||
-                  details.internationalPhoneNumber != null) ...[
-                Row(
-                  children: [
-                    if (details.website != null) ...[
-                      FloatingActionButton.extended(
-                        onPressed: () => launchUrl(
-                          Uri.parse(details.website!),
-                          mode: LaunchMode.externalApplication,
+                  details.internationalPhoneNumber != null ||
+                  details.verified) ...[
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  clipBehavior: Clip.none,
+                  child: Row(
+                    children: [
+                      if (details.verified) ...[
+                        const FloatingActionButton.extended(
+                          onPressed: null,
+                          icon: Icon(Icons.message),
+                          label: Text("Message"),
                         ),
-                        icon: const Icon(Icons.language),
-                        label: const Text("Open Website"),
-                      ),
-                      const SizedBox(width: 20),
+                        const SizedBox(width: 20),
+                      ],
+                      if (details.website != null) ...[
+                        FloatingActionButton.extended(
+                          onPressed: () => launchUrl(
+                            Uri.parse(details.website!),
+                            mode: LaunchMode.externalApplication,
+                          ),
+                          icon: const Icon(Icons.language),
+                          label: const Text("Open Website"),
+                        ),
+                        const SizedBox(width: 20),
+                      ],
+                      if (details.internationalPhoneNumber != null)
+                        FloatingActionButton.extended(
+                          onPressed: () {
+                            launchUrl(
+                              Uri.parse(
+                                  "tel:${details.internationalPhoneNumber!.replaceAll(' ', '')}"),
+                              mode: LaunchMode.platformDefault,
+                            );
+                          },
+                          icon: const Icon(Icons.call),
+                          label: const Text("Call"),
+                        ),
                     ],
-                    if (details.internationalPhoneNumber != null)
-                      FloatingActionButton.extended(
-                        onPressed: () {
-                          launchUrl(
-                            Uri.parse(
-                                "tel:${details.internationalPhoneNumber!.replaceAll(' ', '')}"),
-                            mode: LaunchMode.platformDefault,
-                          );
-                        },
-                        icon: const Icon(Icons.call),
-                        label: const Text("Call"),
-                      ),
-                  ],
+                  ),
                 ),
                 const SizedBox(height: 20),
               ],
