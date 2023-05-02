@@ -18,7 +18,8 @@ class Chat {
   final String name;
   final String chatId;
   final List<String> participantIds;
-  final List<Message> messages;
+
+  List<Message> messages = <Message>[];
 
   static final Map<String, Chat> _chats = <String, Chat>{};
 
@@ -30,6 +31,10 @@ class Chat {
     return _chats[chatId];
   }
 
+  static bool exist(String chatId) {
+    return _chats.containsKey(chatId);
+  }
+
   static List<String> chatIds() {
     return _chats.keys.toList();
   }
@@ -38,12 +43,13 @@ class Chat {
     required this.name,
     required this.chatId,
     required this.participantIds,
-    this.messages = const <Message>[],
+    List<Message>? defaultMessages,
   }) {
     if (_chats.containsKey(chatId)) {
       throw "Chat with id $chatId already exists!";
     }
 
+    if (defaultMessages != null) messages = defaultMessages;
     _chats[chatId] = this;
   }
 
@@ -58,9 +64,12 @@ class Chat {
       throw "Sender \"$senderId\" is not part of this chat";
     }
 
+    String messageBody = body.trim();
+    if (messageBody.isEmpty) return;
+
     messages.add(
       Message(
-        body: body,
+        body: messageBody,
         senderId: senderId,
         sentAt: DateTime.now(),
       ),

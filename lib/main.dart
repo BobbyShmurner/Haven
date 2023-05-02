@@ -80,7 +80,7 @@ Future<void> main() async {
     chatId: "text_chat",
     name: "Test Chat",
     participantIds: ['0', '-1'],
-    messages: [
+    defaultMessages: [
       Message(
         senderId: '-1',
         body: "Test Message From Test Place",
@@ -488,7 +488,7 @@ class _MapPageState extends State<MapPage> {
                                   )
                             : PlaceDetailsWidget(
                                 PlaceDetails(
-                                  id: "Id",
+                                  id: "testPlaceId",
                                   name: "Test Place",
                                   position: _cameraPos!.target,
                                   type: PlaceType.suicide,

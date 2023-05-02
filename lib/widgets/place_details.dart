@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
-import 'rating.dart';
 import '../src/place.dart';
+import '../src/messages.dart';
+
+import 'rating.dart';
+import 'chat_page.dart';
 
 class PlaceDetailsWidget extends StatelessWidget {
   const PlaceDetailsWidget(
@@ -26,24 +29,6 @@ class PlaceDetailsWidget extends StatelessWidget {
               ListTile(
                 visualDensity: VisualDensity.comfortable,
                 contentPadding: EdgeInsets.zero,
-                // title: Row(
-                //   mainAxisSize: MainAxisSize.min,
-                //   children: [
-                //     Expanded(
-                //       child: Text(
-                //         details.name,
-                //         style: const TextStyle(fontSize: 28),
-                //       ),
-                //     ),
-                //     if (details.verified) ...const [
-                //       SizedBox(width: 10),
-                //       Icon(
-                //         Icons.verified,
-                //         color: Colors.blue,
-                //       ),
-                //     ],
-                //   ],
-                // ),
                 title: Text.rich(
                   TextSpan(
                     style: const TextStyle(fontSize: 28),
@@ -137,15 +122,33 @@ class PlaceDetailsWidget extends StatelessWidget {
                   child: Row(
                     children: [
                       if (details.verified) ...[
-                        const FloatingActionButton.extended(
-                          onPressed: null,
-                          icon: Icon(Icons.message),
-                          label: Text("Message"),
+                        FloatingActionButton.extended(
+                          heroTag: null,
+                          icon: const Icon(Icons.message),
+                          label: const Text("Message"),
+                          onPressed: () {
+                            if (!Chat.exist(details.id)) {
+                              Chat(
+                                name: details.name,
+                                chatId: details.id,
+                                participantIds: ['0', details.id],
+                              );
+                            }
+
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) {
+                                  return ChatPage(chatId: details.id);
+                                },
+                              ),
+                            );
+                          },
                         ),
                         const SizedBox(width: 20),
                       ],
                       if (details.website != null) ...[
                         FloatingActionButton.extended(
+                          heroTag: null,
                           onPressed: () => launchUrl(
                             Uri.parse(details.website!),
                             mode: LaunchMode.externalApplication,
@@ -157,6 +160,7 @@ class PlaceDetailsWidget extends StatelessWidget {
                       ],
                       if (details.internationalPhoneNumber != null)
                         FloatingActionButton.extended(
+                          heroTag: null,
                           onPressed: () {
                             launchUrl(
                               Uri.parse(
@@ -174,6 +178,7 @@ class PlaceDetailsWidget extends StatelessWidget {
               ],
               if (details.url != null) ...[
                 FloatingActionButton.extended(
+                  heroTag: null,
                   onPressed: () => launchUrl(
                     Uri.parse(details.url!),
                     mode: LaunchMode.externalApplication,
