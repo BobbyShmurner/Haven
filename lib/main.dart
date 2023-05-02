@@ -1,7 +1,9 @@
 import 'src/maps_api.dart' as maps_api;
+import 'src/messages.dart';
 import 'src/location.dart';
 import 'src/place.dart';
 
+import 'widgets/chat_list_page.dart';
 import 'widgets/loading_page.dart';
 import 'widgets/login_page.dart';
 import 'widgets/place_details.dart';
@@ -73,6 +75,19 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  Chat(
+    chatId: "text_chat",
+    name: "Test Chat",
+    participantIds: ['0', '-1'],
+    messages: [
+      Message(
+        senderId: '-1',
+        body: "Test Message From Test Place",
+        sentAt: DateTime(2023, 05, 02, 18, 32, 15),
+      )
+    ],
+  );
 
   runApp(const MyApp());
 }
@@ -236,16 +251,30 @@ class _MapPageState extends State<MapPage> {
                         "Haven",
                         style: TextStyle(
                           fontSize: 52,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      subtitle: Text("Find safety and comfort near you"),
+                      subtitle: Text(
+                        "Find safety and comfort near you",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ),
                 ListTile(
                   leading: const Icon(Icons.chat),
                   title: const Text("Messages"),
-                  onTap: () => Navigator.pop(context),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ChatListPage(),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

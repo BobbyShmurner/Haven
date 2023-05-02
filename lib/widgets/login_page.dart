@@ -24,12 +24,15 @@ class LoginPage extends StatelessWidget {
             const Text(
               "Haven",
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 80, color: Colors.blue),
+              style: TextStyle(
+                  fontSize: 80,
+                  color: Colors.blue,
+                  fontWeight: FontWeight.bold),
             ),
             const Text(
               "Business Login",
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, color: Colors.black),
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const Spacer(),
             TextField(

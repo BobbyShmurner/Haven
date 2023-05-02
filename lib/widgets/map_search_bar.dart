@@ -41,6 +41,8 @@ class _MapSearchBarState extends State<MapSearchBar> {
   }
 
   void unfocus() {
+    if (!showAutocomplete) return;
+
     showAutocomplete = false;
     FocusManager.instance.primaryFocus?.unfocus();
   }
