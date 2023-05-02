@@ -6,6 +6,7 @@ import 'src/place.dart';
 import 'pages/chat_list.dart';
 import 'pages/loading.dart';
 import 'pages/login.dart';
+import 'pages/about.dart';
 
 import 'widgets/place_details.dart';
 import 'widgets/map_search_bar.dart';
@@ -20,7 +21,7 @@ import 'package:enum_flag/enum_flag.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 const int searchRadius = 50000;
-
+const String tagLine = "Find safety and comfort near you";
 const String mapStyle = """[
   {
     "featureType": "administrative.land_parcel",
@@ -256,7 +257,7 @@ class _MapPageState extends State<MapPage> {
                         ),
                       ),
                       subtitle: Text(
-                        "Find safety and comfort near you",
+                        tagLine,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
@@ -294,11 +295,11 @@ class _MapPageState extends State<MapPage> {
                   leading: const Icon(Icons.info),
                   title: const Text("About"),
                   onTap: () {
-                    // TODO: Add About Page
                     Navigator.pop(context);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("TODO: Add About Page"),
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AboutPage(),
                       ),
                     );
                   },
