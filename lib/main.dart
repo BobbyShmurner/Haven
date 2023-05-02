@@ -77,13 +77,13 @@ Future<void> main() async {
   ]);
 
   Chat(
-    chatId: "text_chat",
-    name: "Test Chat",
+    chatId: "example_chat",
+    name: "Example Chat",
     participantIds: ['0', '-1'],
     defaultMessages: [
       Message(
         senderId: '-1',
-        body: "Test Message From Test Place",
+        body: "Hello World!",
         sentAt: DateTime(2023, 05, 02, 18, 32, 15),
       )
     ],
