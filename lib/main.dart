@@ -276,6 +276,32 @@ class _MapPageState extends State<MapPage> {
                     );
                   },
                 ),
+                ListTile(
+                  leading: const Icon(Icons.settings),
+                  title: const Text("Settings"),
+                  onTap: () {
+                    // TODO: Add Settings Page
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("TODO: Add Settings Page"),
+                      ),
+                    );
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.info),
+                  title: const Text("About"),
+                  onTap: () {
+                    // TODO: Add About Page
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("TODO: Add About Page"),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
             const Spacer(),
