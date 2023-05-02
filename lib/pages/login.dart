@@ -21,12 +21,12 @@ class LoginPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             const SizedBox(height: 50),
-            const Text(
+            Text(
               "Haven",
               textAlign: TextAlign.center,
               style: TextStyle(
                   fontSize: 80,
-                  color: Colors.blue,
+                  color: Theme.of(context).primaryColor,
                   fontWeight: FontWeight.bold),
             ),
             const Text(
@@ -56,7 +56,7 @@ class LoginPage extends StatelessWidget {
             ),
             Card(
               elevation: 5.0,
-              color: Colors.blue,
+              color: Theme.of(context).primaryColor,
               child: ListTile(
                 leading: const Icon(Icons.email),
                 title: const Text(

@@ -241,11 +241,11 @@ class _MapPageState extends State<MapPage> {
               padding: EdgeInsets.zero,
               shrinkWrap: true,
               children: [
-                const DrawerHeader(
+                DrawerHeader(
                   decoration: BoxDecoration(
-                    color: Colors.blue,
+                    color: Theme.of(context).primaryColor,
                   ),
-                  child: Align(
+                  child: const Align(
                     child: ListTile(
                       textColor: Colors.white,
                       title: Text(
@@ -463,8 +463,8 @@ class _MapPageState extends State<MapPage> {
                 ),
               ),
               ExpansionTile(
-                collapsedBackgroundColor: Colors.blue,
-                backgroundColor: Colors.blue,
+                collapsedBackgroundColor: Theme.of(context).primaryColor,
+                backgroundColor: Theme.of(context).primaryColor,
                 iconColor: Colors.white,
                 collapsedIconColor: Colors.white,
                 textColor: Colors.white,
