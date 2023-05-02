@@ -32,11 +32,13 @@ class PlaceDetailsWidget extends StatelessWidget {
                       details.name,
                       style: const TextStyle(fontSize: 28),
                     ),
-                    if (details.verified)
-                      const Icon(
+                    if (details.verified) ...const [
+                      SizedBox(width: 10),
+                      Icon(
                         Icons.verified,
                         color: Colors.blue,
                       ),
+                    ],
                   ],
                 ),
                 subtitle: Column(

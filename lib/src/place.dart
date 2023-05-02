@@ -215,7 +215,7 @@ class Place {
     return place;
   }
 
-  static List<Place> getPlaces({int? mask}) {
+  static List<Place> getPlaces({int? mask, bool onlyVerified = false}) {
     mask ??= PlaceType.values.flag;
 
     List<Place> places = <Place>[];
@@ -224,17 +224,26 @@ class Place {
 
     for (PlaceType type in placeTypes) {
       if (!Place._cachedPlacesOfType.containsKey(type)) continue;
-      places.addAll(Place._cachedPlacesOfType[type]!);
+      var placesOfType = Place._cachedPlacesOfType[type]!;
+
+      if (onlyVerified) {
+        placesOfType = placesOfType.where((place) => place.verified).toList();
+      }
+
+      places.addAll(placesOfType);
     }
 
     return places;
   }
 
   static List<Marker> getPlaceMarkers(
-      {int? mask, void Function(Place)? onTap}) {
+      {int? mask, bool onlyVerified = false, void Function(Place)? onTap}) {
     List<Marker> markers = <Marker>[];
 
-    for (Place place in Place.getPlaces(mask: mask)) {
+    for (Place place in Place.getPlaces(
+      mask: mask,
+      onlyVerified: onlyVerified,
+    )) {
       markers.add(place.createMarker(onTap));
     }
 
@@ -300,7 +309,8 @@ class Place {
       name: placeName,
       position: placePos,
       type: placeType,
-      verified: placeId == "id",
+      verified: placeId ==
+          "ChIJ8T8EsUkJYUgR6Ndhqd5xQBY", // TODO: Add Real Verification
     );
   }
 }

@@ -109,6 +109,7 @@ class _MapPageState extends State<MapPage> {
   CameraPosition? _lastCameraPos;
 
   bool _isSearching = false;
+  bool _onlyVerified = false;
   Set<Marker> _markers = <Marker>{};
   int _placeMask = PlaceType.values.flag;
   Place? _selectedPlace;
@@ -163,6 +164,7 @@ class _MapPageState extends State<MapPage> {
   Future<void> rebuildMarkers() async {
     Set<Marker> markers = Place.getPlaceMarkers(
       mask: _placeMask,
+      onlyVerified: _onlyVerified,
       onTap: (place) {
         setState(() => _selectedPlace = place);
       },
@@ -213,7 +215,6 @@ class _MapPageState extends State<MapPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        // leading: const Icon(Icons.location_on),
       ),
       drawer: Drawer(
         child: Column(
@@ -351,28 +352,54 @@ class _MapPageState extends State<MapPage> {
                             ),
                           ),
                         ),
-                        itemBuilder: (context) => PlaceType.values
-                            .map(
-                              (place) => PopupMenuItem(
-                                child: StatefulBuilder(
-                                  builder: (context, localSetState) =>
-                                      CheckboxListTile(
-                                    value: _placeMask.hasFlag(place),
+                        itemBuilder: (context) {
+                          List<PopupMenuEntry<dynamic>> items = PlaceType.values
+                              .map(
+                                (place) => PopupMenuItem(
+                                  child: StatefulBuilder(
+                                    builder: (context, localSetState) =>
+                                        CheckboxListTile(
+                                      value: _placeMask.hasFlag(place),
+                                      onChanged: (newVal) => localSetState(
+                                        () {
+                                          _placeMask = (newVal ?? false)
+                                              ? _placeMask | place.value
+                                              : _placeMask & ~place.value;
+
+                                          rebuildMarkers();
+                                        },
+                                      ),
+                                      title: Text(place.pluralName),
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList();
+
+                          items.add(const PopupMenuItem(child: Divider()));
+
+                          items.add(
+                            PopupMenuItem(
+                              child: StatefulBuilder(
+                                builder: (context, localSetState) {
+                                  return CheckboxListTile(
+                                    value: _onlyVerified,
                                     onChanged: (newVal) => localSetState(
                                       () {
-                                        _placeMask = (newVal ?? false)
-                                            ? _placeMask | place.value
-                                            : _placeMask & ~place.value;
+                                        _onlyVerified = !_onlyVerified;
 
                                         rebuildMarkers();
                                       },
                                     ),
-                                    title: Text(place.pluralName),
-                                  ),
-                                ),
+                                    title: const Text("Only Verified"),
+                                  );
+                                },
                               ),
-                            )
-                            .toList(),
+                            ),
+                          );
+
+                          return items;
+                        },
                       ),
                     ),
                   ],
