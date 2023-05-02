@@ -3,6 +3,7 @@ import 'src/location.dart';
 import 'src/place.dart';
 
 import 'widgets/loading_page.dart';
+import 'widgets/login_page.dart';
 import 'widgets/place_details.dart';
 import 'widgets/map_search_bar.dart';
 import 'widgets/loading_indicator.dart';
@@ -215,46 +216,71 @@ class _MapPageState extends State<MapPage> {
         // leading: const Icon(Icons.location_on),
       ),
       drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(
-                color: Colors.blue,
-              ),
-              child: Align(
-                child: ListTile(
-                  textColor: Colors.white,
-                  title: Text(
-                    "Haven",
-                    style: TextStyle(
-                      fontSize: 52,
+            ListView(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              children: [
+                const DrawerHeader(
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                  ),
+                  child: Align(
+                    child: ListTile(
+                      textColor: Colors.white,
+                      title: Text(
+                        "Haven",
+                        style: TextStyle(
+                          fontSize: 52,
+                        ),
+                      ),
+                      subtitle: Text("Find safety and comfort near you"),
                     ),
                   ),
-                  subtitle: Text("Find safety and comfort near you"),
                 ),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.chat),
-              title: const Text("Messages"),
-              onTap: () => Navigator.pop(context),
-            ),
-            if (kDebugMode) ...[
-              const Divider(),
-              ListTile(
-                leading: const Icon(Icons.api),
-                title: Text(
-                  maps_api.isApiEnabled ? "Disable API" : "Enable API",
+                ListTile(
+                  leading: const Icon(Icons.chat),
+                  title: const Text("Messages"),
+                  onTap: () => Navigator.pop(context),
                 ),
-                onTap: () {
-                  setState(
-                    () => maps_api.isApiEnabled = !maps_api.isApiEnabled,
-                  );
-                  Navigator.pop(context);
-                },
-              ),
-            ],
+              ],
+            ),
+            const Spacer(),
+            const Divider(),
+            ListView(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              children: [
+                if (kDebugMode)
+                  ListTile(
+                    leading: const Icon(Icons.api),
+                    title: Text(
+                      maps_api.isApiEnabled ? "Disable API" : "Enable API",
+                    ),
+                    onTap: () {
+                      setState(
+                        () => maps_api.isApiEnabled = !maps_api.isApiEnabled,
+                      );
+                      Navigator.pop(context);
+                    },
+                  ),
+                ListTile(
+                  leading: const Icon(Icons.login),
+                  title: const Text("Business Login"),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginPage(),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
           ],
         ),
       ),
