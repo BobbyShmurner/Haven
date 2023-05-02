@@ -18,7 +18,7 @@ Add the following to your `android/local.properties` (Again, without the asteris
 ```
 mapsApiKey=*YOUR_API_KEY*
 ```
-**Note:** If the `local.properties` doesn't exist, you may need to build the app for android at least once first
+**Note:** If the `local.properties` doesn't exist, you may need to run `flutter pub get` first
 
 
 Both of these changes can be commited safely without the api key being commited to the repo. **The same cannot be said for the IOS Setup!**
