@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:haven/src/date_time_extensions.dart';
 
 import 'message_bubble.dart';
 
@@ -74,6 +75,22 @@ class _ChatPageState extends State<ChatPage> {
                         if (!message.isFromMe) const Spacer(),
                       ],
                     ),
+                    if (i >= widget.chat!.messages.length - 1 ||
+                        widget.chat!.messages[i + 1].isFromMe !=
+                            message.isFromMe)
+                      Padding(
+                        padding:
+                            const EdgeInsets.only(top: 5, left: 15, right: 15),
+                        child: Align(
+                          alignment: message.isFromMe
+                              ? Alignment.centerRight
+                              : Alignment.centerLeft,
+                          child: Text(
+                            message.sentAt.toShortString(),
+                            style: TextStyle(color: Colors.grey.shade600),
+                          ),
+                        ),
+                      )
                   ],
                 );
               },
