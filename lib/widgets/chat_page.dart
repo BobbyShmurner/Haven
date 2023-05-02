@@ -82,7 +82,11 @@ class _ChatPageState extends State<ChatPage> {
                     ),
                     if (i >= widget.chat!.messages.length - 1 ||
                         widget.chat!.messages[i + 1].isFromMe !=
-                            message.isFromMe)
+                            message.isFromMe ||
+                        widget.chat!.messages[i + 1].sentAt
+                                .difference(message.sentAt)
+                                .inMinutes >=
+                            5)
                       Padding(
                         padding:
                             const EdgeInsets.only(top: 5, left: 15, right: 15),
