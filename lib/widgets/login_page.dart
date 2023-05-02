@@ -37,14 +37,16 @@ class LoginPage extends StatelessWidget {
               decoration: const InputDecoration(
                 hintText: 'Email',
               ),
-              onTapOutside: (_) => FocusScope.of(context).unfocus(),
+              onTapOutside: (_) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
             ),
             TextField(
               keyboardType: TextInputType.visiblePassword,
               decoration: const InputDecoration(
                 hintText: 'Password',
               ),
-              onTapOutside: (_) => FocusScope.of(context).unfocus(),
+              onTapOutside: (_) =>
+                  FocusManager.instance.primaryFocus?.unfocus(),
             ),
             const Spacer(
               flex: 2,
