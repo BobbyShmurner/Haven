@@ -1,8 +1,9 @@
+import 'package:haven/globals.dart' as globals;
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import '../main.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -28,7 +29,7 @@ class AboutPage extends StatelessWidget {
                   fontWeight: FontWeight.bold),
             ),
             const Text(
-              tagLine,
+              globals.tagLine,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 18),
             ),

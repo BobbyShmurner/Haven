@@ -1,5 +1,7 @@
-import 'place.dart';
-import 'maps_api.dart' as maps_api;
+import 'package:haven/globals.dart' as globals;
+
+import 'package:haven/src/maps_api.dart' as maps_api;
+import 'package:haven/src/place.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -26,7 +28,7 @@ class AutocompleteResult {
     List<dynamic>? response = await maps_api.autocomplete(
       searchTerm,
       location: location,
-      radius: 50000,
+      radius: globals.searchRadius,
     );
 
     if (response == null) {

@@ -1,9 +1,9 @@
-import '../src/autocomplete.dart';
-
-import 'autocomplete_button.dart';
-import 'custom_text_field.dart';
-
 import 'dart:math' as math;
+
+import 'package:haven/src/autocomplete.dart';
+
+import 'package:haven/widgets/custom_text_field.dart';
+import 'package:haven/widgets/autocomplete_button.dart';
 
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';

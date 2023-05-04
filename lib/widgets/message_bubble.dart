@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../src/messages.dart';
+import 'package:haven/src/messages.dart';
 
 class MessageBubble extends StatelessWidget {
   const MessageBubble({

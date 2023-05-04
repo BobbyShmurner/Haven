@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
-import '../src/place.dart';
-import '../src/messages.dart';
-import '../pages/chat.dart';
+import 'package:haven/src/place.dart';
+import 'package:haven/src/messages.dart';
+import 'package:haven/pages/chat.dart';
 
-import 'rating.dart';
+import 'package:haven/widgets/rating.dart';
 
 class PlaceDetailsWidget extends StatelessWidget {
   const PlaceDetailsWidget(

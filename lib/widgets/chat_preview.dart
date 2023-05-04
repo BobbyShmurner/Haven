@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../src/date_time_extensions.dart';
-import '../src/messages.dart';
+import 'package:haven/src/date_time_extensions.dart';
+import 'package:haven/src/messages.dart';
 
 class ChatPreview extends StatefulWidget {
   const ChatPreview({
