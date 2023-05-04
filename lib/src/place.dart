@@ -1,5 +1,5 @@
 import 'package:haven/src/maps_api.dart' as maps_api;
-import 'package:haven/src/location.dart';
+import 'package:haven/src/extensions.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:enum_flag/enum_flag.dart';

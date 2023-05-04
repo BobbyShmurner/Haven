@@ -2,6 +2,7 @@ import 'package:haven/globals.dart' as globals;
 
 import 'package:haven/src/place.dart';
 import 'package:haven/src/location.dart';
+import 'package:haven/src/extensions.dart';
 import 'package:haven/src/maps_api.dart' as maps_api;
 
 import 'package:haven/widgets/place_details.dart';
