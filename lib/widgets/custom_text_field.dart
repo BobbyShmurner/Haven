@@ -44,35 +44,35 @@ class _CustomTextFieldState extends State<CustomTextField> {
       child: Card(
         child: AnimatedBuilder(
           animation: _effectiveController,
-          builder: (context, _) => ListTile(
-            dense: true,
-            horizontalTitleGap: 0,
-            focusNode: _effectiveController.focusNode,
-            leading: widget.leading,
-            trailing: _effectiveController.text.isEmpty
-                ? null
-                : IconButton(
-                    icon: const Icon(Icons.cancel_rounded),
-                    onPressed: () => _effectiveController.clear(),
-                  ),
-            title: TextField(
-              autocorrect: false,
-              controller: _effectiveController,
-              keyboardType: widget.keyboardType,
-              onTap: () => () {
-                _effectiveController.focus();
-                widget.onFocus?.call();
-              },
-              onSubmitted: (_) => () {
-                if (widget.unfocusOnSubmit) _effectiveController.unfocus();
-                widget.onSubmitted?.call();
-              },
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                hintText: widget.hintText,
-              ),
+          child: TextField(
+            autocorrect: false,
+            controller: _effectiveController,
+            keyboardType: widget.keyboardType,
+            onTap: () => () {
+              _effectiveController.focus();
+              widget.onFocus?.call();
+            },
+            onSubmitted: (_) => () {
+              if (widget.unfocusOnSubmit) _effectiveController.unfocus();
+              widget.onSubmitted?.call();
+            },
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: widget.hintText,
             ),
           ),
+          builder: (context, child) => ListTile(
+              dense: true,
+              horizontalTitleGap: 0,
+              focusNode: _effectiveController.focusNode,
+              leading: widget.leading,
+              trailing: _effectiveController.text.isEmpty
+                  ? null
+                  : IconButton(
+                      icon: const Icon(Icons.cancel_rounded),
+                      onPressed: () => _effectiveController.clear(),
+                    ),
+              title: child),
         ),
       ),
     );
