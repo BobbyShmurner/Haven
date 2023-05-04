@@ -1,5 +1,7 @@
 import '../src/autocomplete.dart';
+
 import 'autocomplete_button.dart';
+import 'custom_text_field.dart';
 
 import 'dart:math' as math;
 
@@ -21,10 +23,9 @@ class MapSearchBar extends StatefulWidget {
 }
 
 class _MapSearchBarState extends State<MapSearchBar> {
-  final TextEditingController _searchController = TextEditingController();
+  final CustomTextFieldController _searchController =
+      CustomTextFieldController();
   List<AutocompleteResult> _autocompleteResults = <AutocompleteResult>[];
-
-  bool showAutocomplete = false;
 
   @override
   void initState() {
@@ -40,45 +41,22 @@ class _MapSearchBarState extends State<MapSearchBar> {
     });
   }
 
-  void unfocus() {
-    if (!showAutocomplete) return;
-
-    showAutocomplete = false;
-    FocusManager.instance.primaryFocus?.unfocus();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(left: 10.0, right: 60.0),
       child: TapRegion(
-        onTapOutside: (_) => unfocus(),
+        onTapOutside: (_) => _searchController.unfocus(),
         child: Column(
           children: [
-            Card(
-              child: ListTile(
-                dense: true,
-                leading: const Icon(Icons.search_rounded),
-                trailing: _searchController.text.isEmpty
-                    ? null
-                    : IconButton(
-                        icon: const Icon(Icons.cancel_rounded),
-                        onPressed: () => _searchController.clear(),
-                      ),
-                title: TextField(
-                  autocorrect: false,
-                  controller: _searchController,
-                  keyboardType: TextInputType.streetAddress,
-                  onTap: () => showAutocomplete = true,
-                  onSubmitted: (_) => unfocus(),
-                  decoration: const InputDecoration(
-                    hintText: 'Search',
-                    border: InputBorder.none,
-                  ),
-                ),
-              ),
+            CustomTextField(
+              hintText: "Search",
+              unfocusOnTapOutside: false,
+              controller: _searchController,
+              leading: const Icon(Icons.search_rounded),
+              keyboardType: TextInputType.streetAddress,
             ),
-            if (showAutocomplete)
+            if (_searchController.focused)
               Column(
                 children: [
                   SizedBox(
@@ -92,7 +70,7 @@ class _MapSearchBarState extends State<MapSearchBar> {
                           text: Text(_autocompleteResults[i].name),
                           onTap: widget.onAutocompleTapped != null
                               ? () {
-                                  unfocus();
+                                  _searchController.unfocus();
 
                                   widget.onAutocompleTapped!(
                                       _autocompleteResults[i]);

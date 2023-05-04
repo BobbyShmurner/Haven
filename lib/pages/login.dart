@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/custom_text_field.dart';
+
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
@@ -35,21 +37,13 @@ class LoginPage extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const Spacer(),
-            TextField(
+            const CustomTextField(
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                hintText: 'Email',
-              ),
-              onTapOutside: (_) =>
-                  FocusManager.instance.primaryFocus?.unfocus(),
+              hintText: 'Email',
             ),
-            TextField(
+            const CustomTextField(
               keyboardType: TextInputType.visiblePassword,
-              decoration: const InputDecoration(
-                hintText: 'Password',
-              ),
-              onTapOutside: (_) =>
-                  FocusManager.instance.primaryFocus?.unfocus(),
+              hintText: 'Password',
             ),
             const Spacer(
               flex: 2,
