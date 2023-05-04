@@ -49,15 +49,21 @@ Future<List<dynamic>?> searchMaps(
 Future<Map<String, dynamic>?> getPlaceDetails(
   String placeId, {
   List<String> fields = const [
+    // Basic
     "name",
     "geometry",
     "url",
+    "formatted_address",
     "wheelchair_accessible_entrance",
+
+    // Contact
+    "website",
+    "formatted_phone_number",
+    "international_phone_number",
+
+    // Atmosphere
     "rating",
     "user_ratings_total",
-    "formatted_address",
-    "international_phone_number",
-    "formatted_phone_number",
   ],
 }) async {
   if (placeId.trim().isEmpty) return null;

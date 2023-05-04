@@ -122,11 +122,10 @@ class PlaceDetails {
     required this.id,
     required this.verified,
   }) {
-    // Required
+    // Baisc
     name = json['name']!;
     position = LatLngExtensions.fromGeometryJson(json['geometry']!);
 
-    // Baisc
     url = json['url'];
     formattedAddress = json['formatted_address'];
     wheelchairAccessibleEntrance = json['wheelchair_accessible_entrance'];

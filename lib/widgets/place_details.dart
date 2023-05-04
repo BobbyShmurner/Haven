@@ -154,7 +154,7 @@ class PlaceDetailsWidget extends StatelessWidget {
                             mode: LaunchMode.externalApplication,
                           ),
                           icon: const Icon(Icons.language),
-                          label: const Text("Open Website"),
+                          label: const Text("Website"),
                         ),
                         const SizedBox(width: 20),
                       ],
