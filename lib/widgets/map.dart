@@ -1,38 +1,87 @@
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
-
 import 'package:haven/globals.dart' as globals;
 
-import 'package:haven/src/place.dart';
-import 'package:haven/src/location.dart';
-import 'package:haven/src/extensions.dart';
 import 'package:haven/src/maps_api.dart' as maps_api;
-
-import 'package:haven/widgets/place_details.dart';
-import 'package:haven/widgets/map_search_bar.dart';
-import 'package:haven/widgets/loading_indicator.dart';
-
-import 'package:haven/pages/login.dart';
-import 'package:haven/pages/about.dart';
-import 'package:haven/pages/loading.dart';
-import 'package:haven/pages/chat_list.dart';
+import 'package:haven/src/location.dart';
+import 'package:haven/src/place.dart';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:enum_flag/enum_flag.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 import 'dart:async';
 
-class MapController {
-  bool loaded = false;
-  bool isSearching = false;
+class MapController extends ChangeNotifier {
+  Set<Marker> markers = <Marker>{};
+  GoogleMapController? googleMapController;
+
+  CameraPosition? _prevCameraPos;
   CameraPosition cameraPosition = const CameraPosition(
     target: LatLng(54.5869277, -5.9377212), // Kainos, Belfast
     zoom: 5.45,
   );
 
+  bool _isSearching = false;
+  bool get isSearching {
+    return _isSearching;
+  }
+
+  Place? _selectedPlace;
+  Place? get selectedPlace {
+    return _selectedPlace;
+  }
+
+  bool _loading = false;
+  bool get loading {
+    return _loading;
+  }
+
+  bool _loaded = false;
+  bool get loaded {
+    return _loaded;
+  }
+
+  bool _onlyVerified = false;
+  bool get onlyVerified {
+    return _onlyVerified;
+  }
+
+  set onlyVerified(bool value) {
+    _onlyVerified = value;
+    rebuildMarkers();
+  }
+
+  int _placeMask = PlaceType.values.flag;
+  int get placeMask {
+    return _placeMask;
+  }
+
+  MapController() {
+    Timer.periodic(
+      const Duration(seconds: 1),
+      (timer) async {
+        if (!loaded) return;
+
+        if (cameraPosition != _prevCameraPos) {
+          _prevCameraPos = cameraPosition;
+          return;
+        }
+
+        _prevCameraPos = cameraPosition;
+        fetchMarkers(cameraPosition.target);
+      },
+    );
+  }
+
+  void setPlaceFlag(PlaceType place, bool enabled) {
+    _placeMask = enabled ? placeMask | place.value : placeMask & ~place.value;
+
+    rebuildMarkers();
+  }
+
   Future<void> load() async {
+    if (loaded || loading) return;
+    _loading = true;
+
     try {
       LatLng location = await getDeviceLocation();
 
@@ -44,113 +93,97 @@ class MapController {
 
     // Don't rebuild inside of the first fetch because if the fetch returns early,
     // for whatever reason, the map won't ever load
-    await fetchMarkers(cameraPosition.target, shouldRebuildMarkers: false);
-    await rebuildMarkers();
+    await fetchMarkers(
+      cameraPosition.target,
+      shouldRebuildMarkers: false,
+      notify: false,
+    );
+    await rebuildMarkers(notify: false);
 
-    loaded = true;
+    _loaded = true;
+    _loading = false;
+    notifyListeners();
   }
 
   Future<void> fetchMarkers(
     LatLng searchPoint, {
     bool shouldRebuildMarkers = true,
+    bool notify = true,
   }) async {
-    if (!maps_api.isApiEnabled || _searchPoints.contains(searchPoint)) return;
-    _searchPoints.add(searchPoint);
+    if (!maps_api.isApiEnabled) return;
 
-    while (_isSearching) {
+    while (isSearching) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
 
-    for (LatLng existingSearchPoint in _searchPoints) {
-      if (searchPoint == existingSearchPoint) continue;
-      if (existingSearchPoint.dist(searchPoint) < globals.searchRadius * 0.75) {
-        return;
-      }
-    }
+    if (!Place.shouldFetchPlaces(searchPoint)) return;
 
-    setState(() => _isSearching = true);
+    _isSearching = true;
+    if (notify) notifyListeners();
 
-    await Place.fetchPlaces(searchPoint, radius: globals.searchRadius);
-    if (shouldRebuildMarkers) await rebuildMarkers();
+    await Place.fetchPlaces(searchPoint, checkIfShouldSearch: false);
+    if (shouldRebuildMarkers) await rebuildMarkers(notify: false);
 
-    setState(() {
-      _isSearching = false;
-    });
+    _isSearching = false;
+    if (notify) notifyListeners();
   }
 
-  Future<void> rebuildMarkers() async {
-    Set<Marker> markers = Place.getPlaceMarkers(
-      mask: _placeMask,
-      onlyVerified: _onlyVerified,
+  Future<void> rebuildMarkers({
+    bool notify = true,
+  }) async {
+    Set<Marker> newMarkers = Place.getPlaceMarkers(
+      mask: placeMask,
+      onlyVerified: onlyVerified,
       onTap: (place) {
-        setState(() => _selectedPlace = place);
+        _selectedPlace = place;
+        notifyListeners();
       },
     ).toSet();
-    setState(() => _markers = markers);
+
+    markers = newMarkers;
+    if (notify) notifyListeners();
   }
 }
 
 class Map extends StatefulWidget {
-  const Map({super.key});
+  const Map({super.key, this.controller, this.onPlaceSelected});
+
+  final MapController? controller;
+  final void Function(Place)? onPlaceSelected;
 
   @override
   State<Map> createState() => _MapState();
 }
 
 class _MapState extends State<Map> {
-  final List<LatLng> _searchPoints = <LatLng>[];
-
-  GoogleMapController? _mapsController;
-  CameraPosition? _lastCameraPos;
-  CameraPosition? _cameraPos;
-
-  int _placeMask = PlaceType.values.flag;
-  Set<Marker> _markers = <Marker>{};
-  Place? _selectedPlace;
-
-  bool _isSearching = false;
-  bool _onlyVerified = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _firstLoad();
-    });
-
-    Timer.periodic(
-      const Duration(seconds: 1),
-      (timer) async {
-        if (_mapsController == null) return;
-        if (_cameraPos != _lastCameraPos) {
-          _lastCameraPos = _cameraPos;
-          return;
-        }
-
-        _lastCameraPos = _cameraPos;
-        fetchMarkers(_cameraPos!.target);
-      },
-    );
-  }
+  MapController? _fallbackController;
+  MapController get controller =>
+      widget.controller ?? (_fallbackController ??= MapController());
 
   @override
   Widget build(BuildContext context) {
-    return GoogleMap(
-      markers: _markers,
-      mapType: MapType.normal,
-      myLocationEnabled: true,
-      mapToolbarEnabled: false,
-      zoomControlsEnabled: false,
-      tiltGesturesEnabled: false,
-      initialCameraPosition: _cameraPos!,
-      minMaxZoomPreference: const MinMaxZoomPreference(10.0, 20.0),
-      onMapCreated: (GoogleMapController controller) {
-        _mapsController = controller;
-        _mapsController!.setMapStyle(globals.mapStyle);
-      },
-      onCameraMove: (pos) {
-        _cameraPos = pos;
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        if (!controller.loaded) return Container();
+
+        return GoogleMap(
+          markers: controller.markers,
+          mapType: MapType.normal,
+          myLocationEnabled: true,
+          mapToolbarEnabled: false,
+          zoomControlsEnabled: false,
+          tiltGesturesEnabled: false,
+          initialCameraPosition: controller.cameraPosition,
+          minMaxZoomPreference: const MinMaxZoomPreference(10.0, 20.0),
+          onMapCreated: (GoogleMapController googleMapController) {
+            controller.googleMapController = googleMapController;
+            controller.googleMapController!.setMapStyle(globals.mapStyle);
+          },
+          onCameraMove: (pos) {
+            controller.cameraPosition = pos;
+          },
+        );
       },
     );
   }

@@ -1,6 +1,8 @@
 import 'package:haven/src/maps_api.dart' as maps_api;
 import 'package:haven/src/extensions.dart';
 
+import 'package:haven/globals.dart' as globals;
+
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:enum_flag/enum_flag.dart';
 
@@ -159,6 +161,7 @@ class Place {
   static final Map<String, Place> _cachedPlaces = <String, Place>{};
   static final Map<String, PlaceDetails> _cachedPlaceDetails =
       <String, PlaceDetails>{};
+  static final List<LatLng> _pointsAlreadySearched = <LatLng>[];
 
   Place({
     required this.name,
@@ -249,26 +252,40 @@ class Place {
     return markers;
   }
 
-  static Future<List<Place>> fetchPlaces(LatLng searchPos,
-      {int? placeMask, required int radius}) async {
+  static bool shouldFetchPlaces(LatLng searchPos) {
+    if (_pointsAlreadySearched.contains(searchPos)) return false;
+
+    for (LatLng point in _pointsAlreadySearched) {
+      if (searchPos == point) continue;
+      if (point.dist(searchPos) < globals.searchRadius * 0.75) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  static Future<void> fetchPlaces(LatLng searchPos,
+      {int? placeMask, bool checkIfShouldSearch = true}) async {
+    if (checkIfShouldSearch && !shouldFetchPlaces(searchPos)) return;
+    _pointsAlreadySearched.add(searchPos);
+
     placeMask ??= PlaceType.values.flag;
 
     Iterable<PlaceType> placeTypes =
         placeMask.getFlags(PlaceType.values) as Iterable<PlaceType>;
 
     for (PlaceType type in placeTypes) {
-      await _fetchPlacesOfType(searchPos, placeType: type, radius: radius);
+      await _fetchPlacesOfType(searchPos, placeType: type);
     }
-
-    return getPlaces(mask: placeMask);
   }
 
   static Future<void> _fetchPlacesOfType(LatLng searchPos,
-      {required PlaceType placeType, required int radius}) async {
+      {required PlaceType placeType}) async {
     List<dynamic>? response = await maps_api.searchMaps(
       placeType.keyword,
       location: searchPos,
-      radius: radius,
+      radius: globals.searchRadius,
     );
 
     if (response == null) return;
