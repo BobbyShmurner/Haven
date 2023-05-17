@@ -26,7 +26,7 @@ Future<void> main() async {
       Message(
         senderId: '-1',
         body: "Hello World!",
-        sentAt: DateTime(2023, 05, 02, 18, 32, 15),
+        sentAt: DateTime.now(),
       )
     ],
   );

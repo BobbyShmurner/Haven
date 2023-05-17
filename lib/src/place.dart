@@ -29,7 +29,7 @@ extension PlaceTypeExtensions on PlaceType {
       case PlaceType.homelessShelter:
         return "Homeless Shelter";
       case PlaceType.abuse:
-        return "Abuse Center";
+        return "Abuse Centre";
       case PlaceType.police:
         return "Police Station";
       case PlaceType.suicide:
@@ -44,18 +44,20 @@ extension PlaceTypeExtensions on PlaceType {
       case PlaceType.homelessShelter:
         return "Homeless Shelters";
       case PlaceType.abuse:
-        return "Abuse Centers";
+        return "Abuse Centres";
       case PlaceType.police:
         return "Police Stations";
       case PlaceType.suicide:
-        return "Sucide Prevention Centers";
+        return "Sucide Prevention Centres";
     }
   }
 
-  String get keyword {
+  String get searchTerm {
     switch (this) {
       case PlaceType.suicide:
         return "Suicide Help";
+      case PlaceType.abuse:
+        return "Abuse Centre"; // I've found that using the American spelling gives better results
       default:
         return displayName;
     }
@@ -283,7 +285,7 @@ class Place {
   static Future<void> _fetchPlacesOfType(LatLng searchPos,
       {required PlaceType placeType}) async {
     List<dynamic>? response = await maps_api.searchMaps(
-      placeType.keyword,
+      placeType.searchTerm,
       location: searchPos,
       radius: globals.searchRadius,
     );
@@ -326,7 +328,7 @@ class Place {
       position: placePos,
       type: placeType,
       verified: placeId ==
-          "ChIJ8T8EsUkJYUgR6Ndhqd5xQBY", // TODO: Add Real Verification
+          "ChIJ8T8EsUkJYUgR6Ndhqd5xQBY", // Just for testing. This is the id of "FALLUP NI"
     );
   }
 }
