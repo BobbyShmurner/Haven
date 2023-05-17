@@ -27,6 +27,7 @@ Future<dynamic> _genericApiCall(String url,
   return jsonDecode(response.body)[returnKey];
 }
 
+// TODO: Implement `next_page_token`
 Future<List<dynamic>?> searchMaps(
   String keyword, {
   required int radius,
