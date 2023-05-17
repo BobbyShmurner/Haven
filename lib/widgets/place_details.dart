@@ -94,6 +94,24 @@ class PlaceDetailsWidget extends StatelessWidget {
                                 Text("· No Wheelchair Accessible Entrance"),
                               ],
                       ),
+                    if (details.website != null)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.language,
+                            size: 18,
+                          ),
+                          Expanded(
+                            child: Text(
+                              "· ${details.website}",
+                              overflow: TextOverflow.fade,
+                              maxLines: 1,
+                              softWrap: false,
+                            ),
+                          ),
+                        ],
+                      ),
                     if (details.formattedAddress != null)
                       Row(
                         mainAxisSize: MainAxisSize.min,

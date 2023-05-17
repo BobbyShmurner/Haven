@@ -57,7 +57,7 @@ extension PlaceTypeExtensions on PlaceType {
       case PlaceType.suicide:
         return "Suicide Help";
       case PlaceType.abuse:
-        return "Abuse Centre"; // I've found that using the American spelling gives better results
+        return "Abuse Center"; // I've found that using the American spelling gives better results
       default:
         return displayName;
     }
